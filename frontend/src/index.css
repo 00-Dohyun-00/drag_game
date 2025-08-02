@@ -5,64 +5,43 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+.app {
+  padding: 2rem;
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", Dotum, sans-serif;
+  text-align: center;
+  color: #000000;
+  background-color: #ffffff;
 }
 
-body {
-  margin: 0;
+.board {
+  display: grid;
+  grid-template-columns: repeat(17, 40px);
+  grid-auto-rows: 40px;
+  gap: 2px;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  background-color: #fce4ec;
+  border: 1px solid #ccc;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-size: 16px;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.cell.selected {
+  background-color: #f06292;
+  color: white;
+}
+
+.cell.empty {
+  background-color: #ffffff;
 }
