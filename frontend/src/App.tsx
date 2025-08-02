@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 const ROWS = 10;
 const COLS = 17;
-const GAME_TIME = 60; // seconds
+const GAME_TIME = 10; // seconds
 
 function getRandomNumber() {
   return Math.floor(Math.random() * 9) + 1;
@@ -97,67 +97,70 @@ function App() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen p-8 text-center text-white flex flex-col items-center justify-center"
       onMouseUp={handleMouseUp}
     >
       <h1 className="text-4xl mb-6 text-white drop-shadow-lg font-bold">
-        🧩 Drag Game
+        Drag Game
       </h1>
-      
-      <p className="text-xl mb-2 text-white drop-shadow-md">
-        점수: {score}
-      </p>
-      
-      <p className="text-xl mb-4 text-white drop-shadow-md">
-        남은 시간: {timeLeft}s
-      </p>
-      
-      <button 
-        onClick={resetGame} 
-        disabled={timeLeft === 0}
-        className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 
+
+      <p>남은 시간: {timeLeft}s</p>
+
+      <div>
+        <div className="flex items-center justify-between w-full text-xl mb-4 text-white drop-shadow-md gap-4">
+          <p>점수: {score}</p>
+
+          <button
+            onClick={resetGame}
+            className="bg-[#F2E4DC] to-red-500 hover:from-red-500 hover:to-red-600 
                    disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
-                   border-none px-6 py-3 rounded-2xl text-white text-base font-semibold 
+                   border-none px-3 py-2 rounded-2xl text-[#594A3C] text-base font-semibold 
                    cursor-pointer my-4 transition-all duration-300 ease-in-out
                    shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:hover:translate-y-0"
-      >
-        🔄 게임 리셋
-      </button>
-      
-      <div className="grid grid-cols-17 gap-1 justify-center mt-4 p-6 
-                      bg-white/15 backdrop-blur-md rounded-2xl border border-white/20">
-        {board.map((row, rowIndex) =>
-          row.map((cell, colIndex) => {
-            const selected = isInSelection(rowIndex, colIndex);
-            const isEmpty = cell === null;
-            
-            return (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={`
+          >
+            다시 시작하기
+          </button>
+        </div>
+
+        <div
+          className="grid grid-cols-17 gap-1 justify-center mt-4 p-6 
+                      bg-white/15 backdrop-blur-md rounded-2xl border border-white/20"
+        >
+          {board.map((row, rowIndex) =>
+            row.map((cell, colIndex) => {
+              const selected = isInSelection(rowIndex, colIndex);
+              const isEmpty = cell === null;
+
+              return (
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  className={`
                   w-10 h-10 rounded-lg flex items-center justify-center 
-                  select-none text-base font-semibold cursor-pointer
-                  transition-all duration-200 ease-in-out shadow-sm
-                  ${isEmpty 
-                    ? 'bg-white/30 border border-dashed border-white/50 cursor-default' 
-                    : 'bg-gradient-to-br from-white to-gray-100 border border-black/10 text-gray-700 hover:-translate-y-0.5 hover:shadow-md'
-                  }
-                  ${selected 
-                    ? 'bg-gradient-to-br from-red-400 to-red-500 text-white scale-105 shadow-lg shadow-red-400/40' 
-                    : ''
+                  select-none text-base font-semibold transition-all duration-200 ease-in-out shadow-sm
+                  ${
+                    timeLeft <= 0
+                      ? isEmpty
+                        ? "bg-white/20 border border-dashed border-white/30 cursor-default opacity-50"
+                        : "bg-gradient-to-br from-[#f8f1ec] to-[#F2E4DC] border border-black/20 text-[#594A3C] cursor-default opacity-50"
+                      : isEmpty
+                      ? "bg-white/30 border border-dashed border-white/50 cursor-default"
+                      : selected
+                      ? "bg-gradient-to-br from-[#8C7764] to-[#594A3C] text-white scale-105 shadow-lg shadow-red-400/40 cursor-pointer"
+                      : "bg-gradient-to-br from-[#f8f1ec] to-[#F2E4DC] border border-black/10 text-[#594A3C] hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
                   }
                 `}
-                onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-                onMouseEnter={() =>
-                  dragStart && setDragEnd({ row: rowIndex, col: colIndex })
-                }
-              >
-                {cell ?? ""}
-              </div>
-            );
-          })
-        )}
+                  onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+                  onMouseEnter={() =>
+                    dragStart && setDragEnd({ row: rowIndex, col: colIndex })
+                  }
+                >
+                  {cell ?? ""}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
