@@ -1,47 +1,9 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-}
-
-.app {
-  padding: 2rem;
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   font-family: "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", Dotum, sans-serif;
-  text-align: center;
-  color: #000000;
-  background-color: #ffffff;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(17, 40px);
-  grid-auto-rows: 40px;
-  gap: 2px;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.cell {
-  width: 40px;
-  height: 40px;
-  background-color: #fce4ec;
-  border: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.cell.selected {
-  background-color: #f06292;
-  color: white;
-}
-
-.cell.empty {
-  background-color: #ffffff;
 }
