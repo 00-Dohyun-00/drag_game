@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import GameOverModal from "./GameOverModal";
 
 const ROWS = 10;
 const COLS = 17;
@@ -80,7 +81,7 @@ function App() {
         newBoard[pos.row][pos.col] = null;
       });
       setBoard(newBoard);
-      setScore((prev) => prev + 1);
+      setScore((prev) => prev + selected.length);
     }
 
     setDragStart(null);
@@ -98,14 +99,18 @@ function App() {
 
   return (
     <div
-      className="min-h-screen p-8 text-center text-white flex flex-col items-center justify-center"
+      className="min-h-screen p-8 text-center text-white flex flex-col items-center justify-center relative"
       onMouseUp={handleMouseUp}
     >
       <h1 className="text-4xl mb-6 text-white drop-shadow-lg font-bold">
         Drag Game
       </h1>
 
-      <p>남은 시간: {timeLeft}s</p>
+      <p>
+        남은 시간 :&nbsp;
+        <span className="text-xl">{timeLeft}</span>
+        &nbsp;s
+      </p>
 
       <div>
         <div className="flex items-center justify-between w-full text-xl mb-4 text-white drop-shadow-md gap-4">
@@ -162,6 +167,13 @@ function App() {
           )}
         </div>
       </div>
+
+      {/* 게임 종료 모달 */}
+      <GameOverModal
+        isVisible={timeLeft <= 0}
+        score={score}
+        onRestart={resetGame}
+      />
     </div>
   );
 }
