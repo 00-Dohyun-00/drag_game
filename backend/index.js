@@ -1,5 +1,6 @@
 import express from "express";
-import pool from "./server.js";
+import pool from "./db.js";
+import authRouter from "./routes/auth.js";
 
 const app = express();
 const port = 3000;
@@ -27,3 +28,5 @@ app.get("/test-db", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
+
+app.use("/", authRouter);
