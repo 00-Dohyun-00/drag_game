@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { loginUser, signUpUser } from "../api/auth.ts";
+import { loginUser, signUpUser, logoutUser } from "../api/auth.ts";
 
 // 로그인 mutation hook
 export const useLogin = () => {
@@ -51,14 +51,20 @@ export const useSignUp = () => {
 export const useLogout = () => {
   const queryClient = useQueryClient();
 
-  const logout = () => {
-    // localStorage에서 토큰과 사용자 정보 제거
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("currentUser");
+  return useMutation({
+    mutationFn: logoutUser,
+    onSuccess: (response) => {
+      if (response.success) {
+        // localStorage에서 토큰과 사용자 정보 제거
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("currentUser");
 
-    // 모든 쿼리 클리어
-    queryClient.clear();
-  };
-
-  return logout;
+        // 모든 쿼리 클리어
+        queryClient.clear();
+      }
+    },
+    onError: (error) => {
+      console.error("로그아웃 실패:", error);
+    },
+  });
 };

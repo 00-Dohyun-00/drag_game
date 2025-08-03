@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onLogin: (username: string) => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +23,8 @@ const LoginPage: React.FC = () => {
         { username, password },
         {
           onSuccess: (response) => {
-            if (response.success && response.data?.user) {
+            if (response.success && !!response.data?.user) {
+              onLogin(response.data?.user.username);
               navigate("/drag-game");
             }
           },

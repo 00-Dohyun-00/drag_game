@@ -17,6 +17,7 @@ const authRequest = async <T>(
       ...defaultHeaders,
       ...options.headers,
     },
+    credentials: "include",
   };
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
@@ -67,5 +68,12 @@ export const signUpUser = async (
   return authRequest<{ user: User; token: string }>("/auth/signup", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+};
+
+// 로그아웃 API
+export const logoutUser = async (): Promise<ApiResponse<null>> => {
+  return authRequest<null>("/auth/logout", {
+    method: "POST",
   });
 };

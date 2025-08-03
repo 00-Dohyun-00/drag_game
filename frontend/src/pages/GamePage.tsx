@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GameOverModal from "../components/GameOverModal";
+import { useLogout } from "../hooks/useAuth";
 
 const ROWS = 10;
 const COLS = 17;
@@ -29,6 +30,8 @@ const GamePage: React.FC<GamePageProps> = ({ currentUser, onLogout }) => {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { mutateAsync } = useLogout();
+
   const generateBoard = () => {
     return Array.from({ length: ROWS }, () =>
       Array.from({ length: COLS }, () => getRandomNumber())
@@ -36,8 +39,18 @@ const GamePage: React.FC<GamePageProps> = ({ currentUser, onLogout }) => {
   };
 
   const handleLogout = () => {
-    onLogout();
-    navigate("/login");
+    mutateAsync(undefined, {
+      onSuccess: (response) => {
+        if (response.success) {
+          onLogout();
+          navigate("/login");
+        }
+      },
+      onError: (error) => {
+        console.error("로그아웃 에러:", error);
+        alert("로그아웃에 실패했습니다.");
+      },
+    });
   };
 
   const resetGame = () => {
