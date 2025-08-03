@@ -1,0 +1,71 @@
+// API 기본 URL
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+
+// 공통 fetch 헬퍼 함수 (인증용)
+const authRequest = async <T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> => {
+  const defaultHeaders: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  const config: RequestInit = {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+
+  if (!response.ok) {
+    throw new Error(`API 요청 실패: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  createdAt: string;
+}
+
+// 로그인 API
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+export const loginUser = async (
+  data: LoginRequest
+): Promise<ApiResponse<{ user: User; token: string }>> => {
+  return authRequest<{ user: User; token: string }>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+};
+
+// 회원가입 API
+export interface SignUpRequest {
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export const signUpUser = async (
+  data: SignUpRequest
+): Promise<ApiResponse<{ user: User; token: string }>> => {
+  return authRequest<{ user: User; token: string }>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+};
