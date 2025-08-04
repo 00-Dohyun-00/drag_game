@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import GamePage from "./pages/GamePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RankingPage from "./pages/RankingPage";
 
 // QueryClient 설정
 const queryClient = new QueryClient({
@@ -36,20 +37,26 @@ function AppContent() {
   // 보호된 페이지에 접근할 때만 세션 확인
   useEffect(() => {
     const checkInitialSession = async () => {
-      const isProtectedRoute = location.pathname === "/drag-game";
+      const protectedRoutes = ["/drag-game", "/ranking"];
+      const isProtectedRoute = protectedRoutes.includes(location.pathname);
 
       if (isProtectedRoute) {
         await meRefetch();
+      } else {
+        // 보호되지 않은 페이지는 즉시 초기화 완료
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     };
 
     checkInitialSession();
   }, [location.pathname, meRefetch]);
 
-  // 세션 확인 결과 처리
+  // 세션 확인 결과 처리 (보호된 페이지에서만)
   useEffect(() => {
-    if (!isInitializing && !meLoading) {
+    const protectedRoutes = ["/drag-game", "/ranking"];
+    const isProtectedRoute = protectedRoutes.includes(location.pathname);
+
+    if (isProtectedRoute && !meLoading && meData !== undefined) {
       if (meData?.success && meData.data?.user) {
         setIsLoggedIn(true);
         setCurrentUser(meData.data.user.username);
@@ -57,8 +64,10 @@ function AppContent() {
         setIsLoggedIn(false);
         setCurrentUser(null);
       }
+
+      setIsInitializing(false);
     }
-  }, [meData, meLoading, isInitializing]);
+  }, [meData, meLoading, location.pathname]);
 
   const handleLogin = (username: string) => {
     setIsLoggedIn(true);
@@ -89,7 +98,7 @@ function AppContent() {
         path="/login"
         element={
           isLoggedIn ? (
-            <Navigate to="/drag-game" replace />
+            <Navigate to="/ranking" replace />
           ) : (
             <LoginPage onLogin={handleLogin} />
           )
@@ -101,7 +110,7 @@ function AppContent() {
         path="/signin"
         element={
           isLoggedIn ? (
-            <Navigate to="/drag-game" replace />
+            <Navigate to="/ranking" replace />
           ) : (
             <SignUpPage onSignUp={handleLogin} />
           )
@@ -112,8 +121,27 @@ function AppContent() {
       <Route
         path="/drag-game"
         element={
-          <ProtectedRoute isAuthenticated={isLoggedIn}>
-            <GamePage currentUser={currentUser || ""} onLogout={handleLogout} />
+          <ProtectedRoute
+            isLoggedIn={isLoggedIn}
+            isInitializing={isInitializing}
+          >
+            <GamePage currentUser={currentUser || ""} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 랭킹 페이지 */}
+      <Route
+        path="/ranking"
+        element={
+          <ProtectedRoute
+            isLoggedIn={isLoggedIn}
+            isInitializing={isInitializing}
+          >
+            <RankingPage
+              currentUser={currentUser || ""}
+              onLogout={handleLogout}
+            />
           </ProtectedRoute>
         }
       />

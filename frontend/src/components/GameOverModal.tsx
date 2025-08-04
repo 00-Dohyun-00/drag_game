@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface GameOverModalProps {
   isVisible: boolean;
@@ -11,6 +12,8 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
   score,
   onRestart,
 }) => {
+  const navigate = useNavigate();
+
   if (!isVisible) return null;
 
   return (
@@ -23,14 +26,24 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
           <div className="text-5xl font-bold text-[#594A3C] mb-4">{score}</div>
           <p className="text-sm opacity-75">잘했어요!</p>
         </div>
-        <button
-          onClick={onRestart}
-          className="bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-8 py-3 rounded-2xl font-semibold
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={onRestart}
+            className="bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-8 py-3 rounded-2xl font-semibold
                      hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-700 ease-in-out
-                     shadow-lg hover:shadow-xl hover:-translate-y-1"
-        >
-          다시 도전하기
-        </button>
+                     shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+          >
+            다시 도전하기
+          </button>
+          <button
+            onClick={() => navigate("/ranking")}
+            className="bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-8 py-3 rounded-2xl font-semibold
+                     hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-700 ease-in-out
+                     shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+          >
+            랭킹 페이지로
+          </button>
+        </div>
       </div>
     </div>
   );

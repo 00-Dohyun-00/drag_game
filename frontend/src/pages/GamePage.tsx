@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import GameOverModal from "../components/GameOverModal";
-import { useLogout } from "../hooks/useAuth";
 
 const ROWS = 10;
 const COLS = 17;
@@ -13,11 +11,9 @@ function getRandomNumber() {
 
 interface GamePageProps {
   currentUser: string;
-  onLogout: () => void;
 }
 
-const GamePage: React.FC<GamePageProps> = ({ currentUser, onLogout }) => {
-  const navigate = useNavigate();
+const GamePage: React.FC<GamePageProps> = ({ currentUser }) => {
   const [board, setBoard] = useState<(number | null)[][]>([]);
   const [dragStart, setDragStart] = useState<{
     row: number;
@@ -30,27 +26,10 @@ const GamePage: React.FC<GamePageProps> = ({ currentUser, onLogout }) => {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { mutateAsync } = useLogout();
-
   const generateBoard = () => {
     return Array.from({ length: ROWS }, () =>
       Array.from({ length: COLS }, () => getRandomNumber())
     );
-  };
-
-  const handleLogout = () => {
-    mutateAsync(undefined, {
-      onSuccess: (response) => {
-        if (response.success) {
-          onLogout();
-          navigate("/login");
-        }
-      },
-      onError: (error) => {
-        console.error("로그아웃 에러:", error);
-        alert("로그아웃에 실패했습니다.");
-      },
-    });
   };
 
   const resetGame = () => {
@@ -128,17 +107,11 @@ const GamePage: React.FC<GamePageProps> = ({ currentUser, onLogout }) => {
       onMouseUp={handleMouseUp}
     >
       <div className="text-center mb-6">
-        <h1 className="text-4xl mb-2 text-white drop-shadow-lg font-bold">
-          🧩 Drag Game
+        <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
+          Drag Game
         </h1>
         <div className="flex items-center justify-center gap-4 text-white/80">
           <span>안녕하세요, {currentUser}님!</span>
-          <button
-            onClick={handleLogout}
-            className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg transition-all duration-200"
-          >
-            로그아웃
-          </button>
         </div>
       </div>
 

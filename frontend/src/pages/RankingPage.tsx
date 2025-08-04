@@ -1,0 +1,184 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useLogout } from "../hooks/useAuth";
+
+interface RankingPageProps {
+  currentUser: string;
+  onLogout: () => void;
+}
+
+// 임시 랭킹 데이터
+const mockRankingData = [
+  { rank: 1, username: "DragonMaster", score: 15420, streak: 12 },
+  { rank: 2, username: "PuzzleKing", score: 14580, streak: 8 },
+  { rank: 3, username: "GameMaster", score: 13750, streak: 6 },
+  { rank: 4, username: "SpeedRunner", score: 12900, streak: 9 },
+  { rank: 5, username: "ComboExpert", score: 11200, streak: 5 },
+  { rank: 6, username: "BlockDestroyer", score: 10800, streak: 7 },
+];
+
+const RankingPage: React.FC<RankingPageProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
+
+  const { mutateAsync } = useLogout();
+
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return "🥇";
+      case 2:
+        return "🥈";
+      case 3:
+        return "🥉";
+      default:
+        return `#${rank}`;
+    }
+  };
+
+  const getRankStyle = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return "bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg";
+      case 2:
+        return "bg-gradient-to-r from-gray-300 to-gray-500 text-white shadow-lg";
+      case 3:
+        return "bg-gradient-to-r from-amber-600 to-amber-800 text-white shadow-lg";
+      default:
+        return "bg-white/80 border border-[#D9C6BA]/30";
+    }
+  };
+
+  const getTextStyle = (rank: number) => {
+    if (rank <= 3) {
+      return {
+        username: "font-bold text-lg",
+        streak: `text-sm ${
+          rank === 1
+            ? "text-yellow-100"
+            : rank === 2
+            ? "text-gray-100"
+            : "text-amber-100"
+        }`,
+        score: "text-xl font-bold",
+        scoreLabel: `text-sm ${
+          rank === 1
+            ? "text-yellow-100"
+            : rank === 2
+            ? "text-gray-100"
+            : "text-amber-100"
+        }`,
+      };
+    }
+    return {
+      username: "font-semibold text-[#594A3C]",
+      streak: "text-xs text-[#8C7764]",
+      score: "text-[#594A3C] font-bold",
+      scoreLabel: "",
+    };
+  };
+
+  const handleLogout = () => {
+    mutateAsync(undefined, {
+      onSuccess: (response) => {
+        if (response.success) {
+          onLogout();
+          navigate("/login");
+        }
+      },
+      onError: (error) => {
+        console.error("로그아웃 에러:", error);
+        alert("로그아웃에 실패했습니다.");
+      },
+    });
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
+            Drag Game
+          </h1>
+          <p className="text-white/80 text-lg">랭킹 순위를 확인하세요!</p>
+        </div>
+
+        {/* Ranking Form */}
+        <div className="w-full max-w-md">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/20">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-[#594A3C] mb-6">
+                🏆 Top Rankings
+              </h2>
+
+              {/* 랭킹 리스트 */}
+              <div className="space-y-2">
+                {mockRankingData.map((player) => {
+                  const textStyles = getTextStyle(player.rank);
+                  return (
+                    <div
+                      key={player.rank}
+                      className={`flex items-center justify-between ${
+                        player.rank <= 3 ? "p-4" : "p-3"
+                      } rounded-xl ${getRankStyle(player.rank)}`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span
+                          className={`${
+                            player.rank <= 3
+                              ? "text-2xl"
+                              : "text-lg font-bold min-w-[30px]"
+                          }`}
+                        >
+                          {getRankIcon(player.rank)}
+                        </span>
+                        <div className="text-left">
+                          <h3 className={textStyles.username}>
+                            {player.username}
+                          </h3>
+                          <p className={textStyles.streak}>
+                            연속 {player.streak}회
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={textStyles.score}>
+                          {player.score.toLocaleString()}
+                        </div>
+                        {textStyles.scoreLabel && (
+                          <div className={textStyles.scoreLabel}>점수</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex mt-5 gap-2">
+                <button
+                  className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
+                       hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
+                       shadow-lg hover:shadow-xl hover:-translate-y-1
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
+                  onClick={() => navigate("/drag-game")}
+                >
+                  게임시작
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="shrink-3 w-full bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white py-3 rounded-xl font-semibold
+                       hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
+                       shadow-lg hover:shadow-xl hover:-translate-y-1
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
+                >
+                  로그아웃
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RankingPage;
