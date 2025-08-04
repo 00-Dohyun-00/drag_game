@@ -5,14 +5,17 @@ import authRouter from "./routes/auth.js";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcrypt";
 
 const app = express();
 const port = 3000;
 
-app.use(cors({
-  origin: 'http://localhost:5173', // 프론트엔드 URL
-  credentials: true // 쿠키 허용
-})); // CORS 미들웨어
+app.use(
+  cors({
+    origin: "http://localhost:5173", // 프론트엔드 URL
+    credentials: true, // 쿠키 허용
+  })
+); // CORS 미들웨어
 app.use(express.json()); // JSON 파싱 미들웨어
 
 // 세션 미들웨어를 passport 전에 설정
@@ -36,11 +39,13 @@ passport.use(
         'SELECT * FROM "users" WHERE "username" = $1',
         [username]
       );
-      console.log("DB 쿼리 결과:", result.rows);
+
+      // 아이디 확인
       if (result.rows.length === 0) {
         return cb(null, false, { message: "아이디 DB에 없음" });
       }
-      if (result.rows[0].password === password) {
+      // 비밀번호 확인
+      if (await bcrypt.compare(password, result.rows[0].password)) {
         return cb(null, result.rows[0]);
       } else {
         return cb(null, false, { message: "비번불일치" });
@@ -78,28 +83,28 @@ passport.deserializeUser(async (user, done) => {
   }
 });
 
-app.get("/", async (req, res) => {
-  const result = await pool.query("SELECT NOW()");
-  res.send(`PostgreSQL 연결됨: ${result.rows[0].now}`);
-});
+// app.get("/", async (req, res) => {
+//   const result = await pool.query("SELECT NOW()");
+//   res.send(`PostgreSQL 연결됨: ${result.rows[0].now}`);
+// });
 
-app.get("/test-db", async (req, res) => {
-  console.log("=== /test-db 요청 받음 ===");
-  console.log("req.user:", req.user);
-  console.log("req.isAuthenticated():", req.isAuthenticated());
-  try {
-    const result = await pool.query(
-      "SELECT (NOW() + INTERVAL '9 hour') AS kst_time"
-    );
-    res.json({
-      success: true,
-      kstTime: result.rows[0].kst_time,
-    });
-  } catch (err) {
-    console.error("쿼리 실패:", err);
-    res.status(500).json({ success: false });
-  }
-});
+// app.get("/test-db", async (req, res) => {
+//   console.log("=== /test-db 요청 받음 ===");
+//   console.log("req.user:", req.user);
+//   console.log("req.isAuthenticated():", req.isAuthenticated());
+//   try {
+//     const result = await pool.query(
+//       "SELECT (NOW() + INTERVAL '9 hour') AS kst_time"
+//     );
+//     res.json({
+//       success: true,
+//       kstTime: result.rows[0].kst_time,
+//     });
+//   } catch (err) {
+//     console.error("쿼리 실패:", err);
+//     res.status(500).json({ success: false });
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
