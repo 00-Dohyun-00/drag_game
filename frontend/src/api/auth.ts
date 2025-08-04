@@ -23,7 +23,10 @@ const authRequest = async <T>(
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
   if (!response.ok) {
-    throw new Error(`API 요청 실패: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    const error = new Error(errorData.message || `API 요청 실패: ${response.status}`) as Error & { status: number };
+    error.status = response.status;
+    throw error;
   }
 
   return response.json();
@@ -59,9 +62,7 @@ export const loginUser = async (
 export interface SignUpRequest {
   username: string;
   password: string;
-  confirmPassword: string;
 }
-
 export const signUpUser = async (
   data: SignUpRequest
 ): Promise<ApiResponse<{ user: User; token: string }>> => {
