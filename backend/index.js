@@ -6,7 +6,9 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
+import connectPgSimple from "connect-pg-simple";
 
+const PgSession = connectPgSimple(session);
 const app = express();
 const port = 3000;
 
@@ -25,6 +27,10 @@ app.use(
     resave: false, // 유저가 서버로 요청할 때마다 세션 갱신할것인지 여부
     saveUninitialized: false, // 로그인 안 해도 세션 만들것인지 여부
     cookie: { maxAge: 60 * 60 * 1000 }, // 세션 유지 시간 (1시간)
+    store: new PgSession({
+      pool: pool,
+      tableName: "session",
+    }),
   })
 );
 app.use(passport.initialize());
