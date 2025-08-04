@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import GameOverModal from "../components/GameOverModal";
+import { useSaveScoreAPI } from "../api/scores";
 
 const ROWS = 10;
 const COLS = 17;
@@ -10,10 +11,13 @@ function getRandomNumber() {
 }
 
 interface GamePageProps {
-  currentUser: string;
+  currentUserInfo: {
+    username: string;
+    id: string;
+  } | null;
 }
 
-const GamePage: React.FC<GamePageProps> = ({ currentUser }) => {
+const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const [board, setBoard] = useState<(number | null)[][]>([]);
   const [dragStart, setDragStart] = useState<{
     row: number;
@@ -26,29 +30,41 @@ const GamePage: React.FC<GamePageProps> = ({ currentUser }) => {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { mutateAsync: saveScore } = useSaveScoreAPI();
+
   const generateBoard = () => {
     return Array.from({ length: ROWS }, () =>
       Array.from({ length: COLS }, () => getRandomNumber())
     );
   };
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setBoard(generateBoard());
     setScore(0);
     setTimeLeft(GAME_TIME);
-  };
-
-  useEffect(() => {
-    resetGame();
   }, []);
 
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    resetGame();
+  }, [resetGame]);
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      // 사용자 정보가 있을 때만 점수 저장
+      if (currentUserInfo?.id) {
+        const params = {
+          user_id: currentUserInfo.id,
+          score: score,
+        };
+        saveScore(params);
+      }
+      return;
+    }
     timerRef.current = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [timeLeft]);
+  }, [timeLeft, currentUserInfo?.id, saveScore, score]);
 
   const handleMouseDown = (row: number, col: number) => {
     if (board[row][col] === null || timeLeft <= 0) return;
@@ -111,7 +127,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUser }) => {
           Drag Game
         </h1>
         <div className="flex items-center justify-center gap-4 text-white/80">
-          <span>안녕하세요, {currentUser}님!</span>
+          <span>안녕하세요, {currentUserInfo?.username}님!</span>
         </div>
       </div>
 

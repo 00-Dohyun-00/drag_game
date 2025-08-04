@@ -1,6 +1,5 @@
-// API 기본 URL
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+import { API_BASE_URL } from "./config";
+import type { ApiResponse } from "./config";
 
 // 공통 fetch 헬퍼 함수 (인증용)
 const authRequest = async <T>(
@@ -34,11 +33,6 @@ const authRequest = async <T>(
   return response.json();
 };
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-}
 
 export interface User {
   id: string;
