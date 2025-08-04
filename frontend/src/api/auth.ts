@@ -17,14 +17,16 @@ const authRequest = async <T>(
       ...defaultHeaders,
       ...options.headers,
     },
-    credentials: "include",
+    credentials: "include", // 세션 쿠키 포함
   };
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.message || `API 요청 실패: ${response.status}`) as Error & { status: number };
+    const error = new Error(
+      errorData.message || `API 요청 실패: ${response.status}`
+    ) as Error & { status: number };
     error.status = response.status;
     throw error;
   }
@@ -69,6 +71,13 @@ export const signUpUser = async (
   return authRequest<{ user: User; token: string }>("/auth/signup", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+};
+
+// 로그인 여부 확인 API
+export const meUser = async (): Promise<ApiResponse<{ user: User }>> => {
+  return authRequest<{ user: User }>("/auth/me", {
+    method: "GET",
   });
 };
 
