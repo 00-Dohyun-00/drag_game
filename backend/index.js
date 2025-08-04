@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import pool from "./db.js";
 import authRouter from "./routes/auth.js";
+import scoresRouter from "./routes/scores.js";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -117,3 +118,4 @@ app.listen(port, () => {
 });
 
 app.use("/auth", authRouter);
+app.use("/scores", scoresRouter);
