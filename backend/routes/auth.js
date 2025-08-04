@@ -79,6 +79,26 @@ router.post("/login", (req, res, next) => {
   })(req, res, next);
 });
 
+// 현재 사용자 정보 조회
+router.get("/me", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({
+      success: true,
+      data: {
+        user: {
+          id: req.user.id,
+          username: req.user.username,
+        },
+      },
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: "로그인이 필요합니다",
+    });
+  }
+});
+
 // 로그아웃
 router.post("/logout", (req, res) => {
   req.logout((err) => {
