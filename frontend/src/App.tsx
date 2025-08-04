@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMe } from "./hooks/useAuth";
@@ -24,9 +25,14 @@ const queryClient = new QueryClient({
   },
 });
 
+// 상수로 정의 (컴포넌트 외부)
+const PROTECTED_ROUTES = ["/drag-game", "/ranking"];
+const AUTH_PAGES = ["/login", "/signin"];
+
 // 메인 앱 컴포넌트 (QueryClient와 Router 내부에서 실행)
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
   const [currentUser, setCurrentUser] = useState<string | null>(null); // 현재 로그인된 사용자의 이름
   const [isInitializing, setIsInitializing] = useState(true); // 앱 초기화 중인지 여부 - 세션 확인이 완료될 때까지 true
@@ -34,40 +40,64 @@ function AppContent() {
   // 세션 확인
   const { data: meData, refetch: meRefetch, isLoading: meLoading } = useMe();
 
-  // 보호된 페이지에 접근할 때만 세션 확인
+  // 보호된 페이지, 로그인/회원가입 페이지에 접근할 때만 세션 확인
   useEffect(() => {
     const checkInitialSession = async () => {
-      const protectedRoutes = ["/drag-game", "/ranking"];
-      const isProtectedRoute = protectedRoutes.includes(location.pathname);
+      const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
 
       if (isProtectedRoute) {
         await meRefetch();
       } else {
-        // 보호되지 않은 페이지는 즉시 초기화 완료
-        setIsInitializing(false);
+        // 로그인/회원가입 페이지의 경우 - 로그인 상태 확인 후 리다이렉트
+        const isAuthPage = AUTH_PAGES.includes(location.pathname);
+        if (isAuthPage) {
+          await meRefetch();
+        } else {
+          // 기타 페이지는 즉시 초기화 완료
+          setIsInitializing(false);
+        }
       }
     };
 
     checkInitialSession();
-  }, [location.pathname, meRefetch]);
+  }, [location.pathname, meRefetch, navigate]);
 
-  // 세션 확인 결과 처리 (보호된 페이지에서만)
+  // 세션 확인 결과 처리
   useEffect(() => {
-    const protectedRoutes = ["/drag-game", "/ranking"];
-    const isProtectedRoute = protectedRoutes.includes(location.pathname);
+    const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
+    const isAuthPage = AUTH_PAGES.includes(location.pathname);
 
-    if (isProtectedRoute && !meLoading && meData !== undefined) {
+    if (
+      (isProtectedRoute || isAuthPage) &&
+      !meLoading &&
+      meData !== undefined
+    ) {
       if (meData?.success && meData.data?.user) {
+        // 로그인된 상태
         setIsLoggedIn(true);
         setCurrentUser(meData.data.user.username);
+
+        // 로그인된 상태로 로그인/회원가입 페이지 접근 시 리다이렉트
+        if (isAuthPage) {
+          alert("이미 로그인되어 있습니다.");
+          navigate("/ranking", { replace: true });
+        }
       } else {
+        // 로그인되지 않은 상태
+        const wasLoggedIn = isLoggedIn;
         setIsLoggedIn(false);
         setCurrentUser(null);
+
+        // 보호된 페이지에서 세션 만료된 경우에만 알림
+        if (isProtectedRoute && wasLoggedIn) {
+          alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+          navigate("/login");
+        }
       }
 
       setIsInitializing(false);
     }
-  }, [meData, meLoading, location.pathname]);
+  }, [meData, meLoading, location.pathname, isLoggedIn, navigate]);
 
   const handleLogin = (username: string) => {
     setIsLoggedIn(true);
