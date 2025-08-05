@@ -16,12 +16,11 @@ const port = process.env.PORT || 3000;
 
 // Render 프록시 설정 (rate limit 에러 해결)
 if (process.env.NODE_ENV === "production") {
-  app.set('trust proxy', 1);
+  app.set("trust proxy", 1);
 }
 
 // 필수 환경변수 검증
 const requiredEnvVars = ["FRONTEND_URL", "SESSION_SECRET", "DATABASE_URL"];
-
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
@@ -31,13 +30,30 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true, // 쿠키 허용
-  })
-); // CORS 미들웨어
+// CORS 설정 - 개발/배포 환경 자동 감지
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5173", // Vite 개발 서버
+      "http://localhost:3000", // 기타 개발 서버
+    ].filter(Boolean);
 
+    if (!origin && process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS 정책에 의해 차단됨"));
+    }
+  },
+  credentials: true, // 쿠키 허용
+  optionsSuccessStatus: 200, // 일부 레거시 브라우저 지원
+};
+
+app.use(cors(corsOptions));
 
 // Rate Limiting 설정
 const authLimiter = rateLimit({
@@ -121,7 +137,6 @@ passport.serializeUser((user, done) => {
 
 // 유저가 보낸 쿠키(세션 아이디 담긴) 분석
 passport.deserializeUser(async (user, done) => {
-
   try {
     if (!user || !user.id) {
       return done(null, false);
