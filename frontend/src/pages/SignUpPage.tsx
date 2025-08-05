@@ -38,7 +38,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
               if (response.success && !!response.data?.user) {
                 alert("회원가입에 성공했습니다!");
                 onSignUp(response.data?.user.username);
-                navigate("/drag-game");
+                navigate("/ranking");
               }
             },
             onError: (error: Error & { status?: number }) => {

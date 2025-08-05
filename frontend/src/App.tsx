@@ -42,7 +42,12 @@ function AppContent() {
   const [isInitializing, setIsInitializing] = useState(true); // 앱 초기화 중인지 여부 - 세션 확인이 완료될 때까지 true
 
   // 세션 확인
-  const { data: meData, refetch: meRefetch, isLoading: meLoading } = useMe();
+  const {
+    data: meData,
+    error: meError,
+    refetch: meRefetch,
+    isLoading: meLoading,
+  } = useMe();
 
   // 보호된 페이지, 로그인/회원가입 페이지에 접근할 때만 세션 확인
   useEffect(() => {
@@ -74,7 +79,7 @@ function AppContent() {
     if (
       (isProtectedRoute || isAuthPage) &&
       !meLoading &&
-      meData !== undefined
+      (meData !== undefined || meError)
     ) {
       if (meData?.success && meData.data?.user) {
         // 로그인된 상태
@@ -98,16 +103,20 @@ function AppContent() {
         if (isProtectedRoute && wasLoggedIn) {
           alert("세션이 만료되었습니다. 다시 로그인해주세요.");
           navigate("/login");
+        } else if (isProtectedRoute && (meError as any)?.status === 401) {
+          navigate("/login");
         }
       }
 
       setIsInitializing(false);
     }
-  }, [meData, meLoading, location.pathname, isLoggedIn, navigate]);
+  }, [meData, meLoading, location.pathname, isLoggedIn, navigate, meError]);
 
-  const handleLogin = (username: string) => {
+  const handleLogin = async (username: string) => {
     setIsLoggedIn(true);
     setCurrentUser(username);
+    // 세션 정보 즉시 업데이트
+    await meRefetch();
   };
 
   const handleLogout = () => {
