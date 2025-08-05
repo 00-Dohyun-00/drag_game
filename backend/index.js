@@ -22,11 +22,6 @@ if (process.env.NODE_ENV === "production") {
 // 필수 환경변수 검증
 const requiredEnvVars = ["FRONTEND_URL", "SESSION_SECRET", "DATABASE_URL"];
 
-console.log("=== 환경변수 검증 ===");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
-console.log("SESSION_SECRET 존재:", !!process.env.SESSION_SECRET);
-console.log("DATABASE_URL 존재:", !!process.env.DATABASE_URL);
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
@@ -43,8 +38,6 @@ app.use(
   })
 ); // CORS 미들웨어
 
-console.log("=== CORS 설정 ===");
-console.log("허용된 Origin:", process.env.FRONTEND_URL);
 
 // Rate Limiting 설정
 const authLimiter = rateLimit({
@@ -71,12 +64,6 @@ app.use(generalLimiter); // 전체 API에 적용
 app.use(express.json()); // JSON 파싱 미들웨어
 
 // 세션 미들웨어를 passport 전에 설정
-console.log("=== 세션 설정 ===");
-console.log("쿠키 secure:", process.env.NODE_ENV === "production");
-console.log(
-  "쿠키 sameSite:",
-  process.env.NODE_ENV === "production" ? "none" : "lax"
-);
 
 app.use(
   session({
@@ -134,13 +121,9 @@ passport.serializeUser((user, done) => {
 
 // 유저가 보낸 쿠키(세션 아이디 담긴) 분석
 passport.deserializeUser(async (user, done) => {
-  console.log("=== deserializeUser 호출됨 ===");
-  console.log("전달받은 user 객체:", user);
-  console.log("user.id:", user?.id);
 
   try {
     if (!user || !user.id) {
-      console.log("user 또는 user.id가 없음");
       return done(null, false);
     }
 
@@ -148,17 +131,13 @@ passport.deserializeUser(async (user, done) => {
       'SELECT id, username FROM "users" WHERE id = $1',
       [user.id]
     );
-    console.log("DB 쿼리 결과:", result.rows);
 
     if (result.rows.length > 0) {
-      console.log("사용자 찾음:", result.rows[0]);
       done(null, result.rows[0]); // password 제외하고 반환
     } else {
-      console.log("DB에서 사용자를 찾을 수 없음");
       done(null, false);
     }
   } catch (err) {
-    console.error("deserializeUser 에러:", err);
     done(err);
   }
 });
