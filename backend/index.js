@@ -58,7 +58,7 @@ app.use(cors(corsOptions));
 // Rate Limiting 설정
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15분
-  max: 50, // 15분 동안 최대 50번 시도
+  max: 10, // 15분 동안 최대 10번 시도
   message: {
     success: false,
     message: "너무 많은 로그인 시도입니다. 15분 후 다시 시도해주세요.",
