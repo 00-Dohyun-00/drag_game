@@ -31,7 +31,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   );
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   const { mutateAsync: saveScore } = useSaveScoreAPI();
 
@@ -63,9 +63,9 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
       }
       return;
     }
-    timerRef.current = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+    timerRef.current = window.setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) window.clearTimeout(timerRef.current);
     };
   }, [timeLeft, currentUserInfo?.id, saveScore, score]);
 
