@@ -66,6 +66,7 @@ app.use(
       secure: process.env.NODE_ENV === "production", // HTTPS에서만 쿠키 전송
       httpOnly: true, // XSS 방지
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF 방지
+      domain: process.env.NODE_ENV === "production" ? undefined : undefined, // cross-origin에서는 domain 설정 안함
     },
     store: new PgSession({
       pool: pool,
