@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const ROWS = 10;
 const COLS = 17;
-const GAME_TIME = 10; // seconds
+const GAME_TIME = 60; // seconds
 
 function getRandomNumber() {
   return Math.floor(Math.random() * 9) + 1;
@@ -63,7 +63,10 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
       }
       return;
     }
-    timerRef.current = window.setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+    timerRef.current = window.setTimeout(
+      () => setTimeLeft((prev) => prev - 1),
+      1000
+    );
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
