@@ -78,15 +78,29 @@ router.post("/signup", async (req, res) => {
         });
       }
 
-      res.status(201).json({
-        success: true,
-        message: "회원가입 및 로그인 성공",
-        data: {
-          user: {
-            id: newUser.id,
-            username: newUser.username,
+      // 세션 강제 저장
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("회원가입 후 세션 저장 실패:", saveErr);
+          return res.status(500).json({
+            success: false,
+            message: "회원가입은 성공했으나 세션 저장 실패",
+          });
+        }
+        
+        console.log("회원가입 성공 - 세션 저장됨:", req.sessionID);
+        console.log("저장된 사용자:", req.user);
+
+        res.status(201).json({
+          success: true,
+          message: "회원가입 및 로그인 성공",
+          data: {
+            user: {
+              id: newUser.id,
+              username: newUser.username,
+            },
           },
-        },
+        });
       });
     });
   } catch (error) {
@@ -111,11 +125,22 @@ router.post("/login", (req, res, next) => {
     req.logIn(user, (err) => {
       if (err) return next(err);
 
-      res.json({
-        success: true,
-        data: {
-          user: { id: user.id, username: user.username },
-        },
+      // 세션 강제 저장
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("세션 저장 실패:", saveErr);
+          return next(saveErr);
+        }
+        
+        console.log("로그인 성공 - 세션 저장됨:", req.sessionID);
+        console.log("저장된 사용자:", req.user);
+        
+        res.json({
+          success: true,
+          data: {
+            user: { id: user.id, username: user.username },
+          },
+        });
       });
     });
   })(req, res, next);

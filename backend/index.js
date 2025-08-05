@@ -14,6 +14,11 @@ const PgSession = connectPgSimple(session);
 const app = express();
 const port = process.env.PORT;
 
+// Render 프록시 설정 (rate limit 에러 해결)
+if (process.env.NODE_ENV === "production") {
+  app.set('trust proxy', 1);
+}
+
 // 필수 환경변수 검증
 const requiredEnvVars = ["FRONTEND_URL", "SESSION_SECRET", "DATABASE_URL"];
 
