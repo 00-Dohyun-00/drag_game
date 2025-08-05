@@ -8,26 +8,65 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import connectPgSimple from "connect-pg-simple";
+import rateLimit from "express-rate-limit";
 
 const PgSession = connectPgSimple(session);
 const app = express();
 const port = 3000;
 
+// 필수 환경변수 검증
+const requiredEnvVars = ["FRONTEND_URL", "SESSION_SECRET", "DATABASE_URL"];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`${envVar} 환경변수가 설정되지 않았습니다.`);
+    console.error(".env.example 파일을 참고하여 .env 파일을 생성해주세요.");
+    process.exit(1);
+  }
+}
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // 프론트엔드 URL
+    origin: process.env.FRONTEND_URL,
     credentials: true, // 쿠키 허용
   })
 ); // CORS 미들웨어
+
+// Rate Limiting 설정
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15분
+  max: 5, // 15분 동안 최대 5번 시도
+  message: {
+    success: false,
+    message: "너무 많은 로그인 시도입니다. 15분 후 다시 시도해주세요.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15분
+  max: 100, // 15분 동안 최대 100번 요청
+  message: {
+    success: false,
+    message: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요.",
+  },
+});
+
+app.use(generalLimiter); // 전체 API에 적용
 app.use(express.json()); // JSON 파싱 미들웨어
 
 // 세션 미들웨어를 passport 전에 설정
 app.use(
   session({
-    secret: "암호화에 쓸 비번",
+    secret: process.env.SESSION_SECRET,
     resave: false, // 유저가 서버로 요청할 때마다 세션 갱신할것인지 여부
     saveUninitialized: false, // 로그인 안 해도 세션 만들것인지 여부
-    cookie: { maxAge: 60 * 60 * 1000 }, // 세션 유지 시간 (1시간)
+    cookie: {
+      maxAge: 60 * 60 * 1000, // 세션 유지 시간 (1시간)
+      secure: process.env.NODE_ENV === "production", // HTTPS에서만 쿠키 전송
+      httpOnly: true, // XSS 방지
+      sameSite: "lax", // CSRF 방지
+    },
     store: new PgSession({
       pool: pool,
       tableName: "session",
@@ -90,32 +129,9 @@ passport.deserializeUser(async (user, done) => {
   }
 });
 
-// app.get("/", async (req, res) => {
-//   const result = await pool.query("SELECT NOW()");
-//   res.send(`PostgreSQL 연결됨: ${result.rows[0].now}`);
-// });
-
-// app.get("/test-db", async (req, res) => {
-//   console.log("=== /test-db 요청 받음 ===");
-//   console.log("req.user:", req.user);
-//   console.log("req.isAuthenticated():", req.isAuthenticated());
-//   try {
-//     const result = await pool.query(
-//       "SELECT (NOW() + INTERVAL '9 hour') AS kst_time"
-//     );
-//     res.json({
-//       success: true,
-//       kstTime: result.rows[0].kst_time,
-//     });
-//   } catch (err) {
-//     console.error("쿼리 실패:", err);
-//     res.status(500).json({ success: false });
-//   }
-// });
-
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
 
-app.use("/auth", authRouter);
+app.use("/auth", authLimiter, authRouter); // 인증 API에 더 엄격한 제한
 app.use("/scores", scoresRouter);

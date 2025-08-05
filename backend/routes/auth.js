@@ -13,8 +13,39 @@ router.post("/signup", async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    // 입력 유효성 검증
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "사용자명과 비밀번호를 입력해주세요",
+      });
+    }
+
+    // 비밀번호 정책 검증
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "비밀번호는 최소 8자 이상이어야 합니다",
+      });
+    }
+
+    if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: "비밀번호는 영문자와 숫자를 포함해야 합니다",
+      });
+    }
+
+    // 사용자명 길이 제한
+    if (username.length < 2 || username.length > 20) {
+      return res.status(400).json({
+        success: false,
+        message: "사용자명은 2-20자 사이여야 합니다",
+      });
+    }
+
     // 해싱
-    let hashPW = await bcrypt.hash(password, 10);
+    let hashPW = await bcrypt.hash(password, 12);
 
     // 사용자 중복 체크
     const existingUser = await pool.query(
