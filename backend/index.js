@@ -16,6 +16,13 @@ const port = process.env.PORT;
 
 // 필수 환경변수 검증
 const requiredEnvVars = ["FRONTEND_URL", "SESSION_SECRET", "DATABASE_URL"];
+
+console.log("=== 환경변수 검증 ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("SESSION_SECRET 존재:", !!process.env.SESSION_SECRET);
+console.log("DATABASE_URL 존재:", !!process.env.DATABASE_URL);
+
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`${envVar} 환경변수가 설정되지 않았습니다.`);
@@ -31,10 +38,13 @@ app.use(
   })
 ); // CORS 미들웨어
 
+console.log("=== CORS 설정 ===");
+console.log("허용된 Origin:", process.env.FRONTEND_URL);
+
 // Rate Limiting 설정
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15분
-  max: 5, // 15분 동안 최대 5번 시도
+  max: 50, // 15분 동안 최대 50번 시도
   message: {
     success: false,
     message: "너무 많은 로그인 시도입니다. 15분 후 다시 시도해주세요.",
@@ -56,6 +66,13 @@ app.use(generalLimiter); // 전체 API에 적용
 app.use(express.json()); // JSON 파싱 미들웨어
 
 // 세션 미들웨어를 passport 전에 설정
+console.log("=== 세션 설정 ===");
+console.log("쿠키 secure:", process.env.NODE_ENV === "production");
+console.log(
+  "쿠키 sameSite:",
+  process.env.NODE_ENV === "production" ? "none" : "lax"
+);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -66,7 +83,7 @@ app.use(
       secure: process.env.NODE_ENV === "production", // HTTPS에서만 쿠키 전송
       httpOnly: true, // XSS 방지
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF 방지
-      domain: process.env.NODE_ENV === "production" ? undefined : undefined, // cross-origin에서는 domain 설정 안함
+      domain: process.env.NODE_ENV === "production" ? undefined : undefined, // 크로스 도메인에서는 도메인 설정 안함
     },
     store: new PgSession({
       pool: pool,
@@ -112,20 +129,31 @@ passport.serializeUser((user, done) => {
 
 // 유저가 보낸 쿠키(세션 아이디 담긴) 분석
 passport.deserializeUser(async (user, done) => {
-  console.log("deserializeUser 호출됨:", user);
+  console.log("=== deserializeUser 호출됨 ===");
+  console.log("전달받은 user 객체:", user);
+  console.log("user.id:", user?.id);
+
   try {
+    if (!user || !user.id) {
+      console.log("user 또는 user.id가 없음");
+      return done(null, false);
+    }
+
     const result = await pool.query(
       'SELECT id, username FROM "users" WHERE id = $1',
       [user.id]
     );
-    console.log("result", result);
+    console.log("DB 쿼리 결과:", result.rows);
+
     if (result.rows.length > 0) {
-      console.log("result.rows", result.rows);
+      console.log("사용자 찾음:", result.rows[0]);
       done(null, result.rows[0]); // password 제외하고 반환
     } else {
+      console.log("DB에서 사용자를 찾을 수 없음");
       done(null, false);
     }
   } catch (err) {
+    console.error("deserializeUser 에러:", err);
     done(err);
   }
 });

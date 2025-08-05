@@ -123,7 +123,14 @@ router.post("/login", (req, res, next) => {
 
 // 현재 사용자 정보 조회
 router.get("/me", (req, res) => {
+  console.log("=== /auth/me 요청 받음 ===");
+  console.log("req.sessionID:", req.sessionID);
+  console.log("req.session:", req.session);
+  console.log("req.user:", req.user);
+  console.log("req.isAuthenticated():", req.isAuthenticated());
+  
   if (req.isAuthenticated()) {
+    console.log("인증됨 - 사용자 정보 반환");
     res.json({
       success: true,
       data: {
@@ -134,6 +141,7 @@ router.get("/me", (req, res) => {
       },
     });
   } else {
+    console.log("인증되지 않음 - 401 반환");
     res.status(401).json({
       success: false,
       message: "로그인이 필요합니다",
