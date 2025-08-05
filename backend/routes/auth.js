@@ -37,15 +37,26 @@ router.post("/signup", async (req, res) => {
 
     const newUser = result.rows[0];
 
-    res.status(201).json({
-      success: true,
-      message: "회원가입 성공",
-      data: {
-        user: {
-          id: newUser.id,
-          username: newUser.username,
+    // 회원가입 성공 후 자동 로그인
+    req.logIn(newUser, (err) => {
+      if (err) {
+        console.error("자동 로그인 실패:", err);
+        return res.status(500).json({
+          success: false,
+          message: "회원가입은 성공했으나 로그인 실패"
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        message: "회원가입 및 로그인 성공",
+        data: {
+          user: {
+            id: newUser.id,
+            username: newUser.username,
+          },
         },
-      },
+      });
     });
   } catch (error) {
     console.error("회원가입 오류:", error);
