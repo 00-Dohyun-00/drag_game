@@ -129,9 +129,9 @@ passport.deserializeUser(async (user, done) => {
   }
 });
 
+app.use("/auth", authLimiter, authRouter); // 인증 API에 더 엄격한 제한
+app.use("/scores", scoresRouter);
+
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
-
-app.use("/auth", authLimiter, authRouter); // 인증 API에 더 엄격한 제한
-app.use("/scores", scoresRouter);
