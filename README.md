@@ -2,9 +2,7 @@
 
 ## 배포 주소
 
-- 프론트엔드:
-- 백엔드(API):
-- 데이터베이스: Supabase (클라우드 기반 PostgreSQL, 비공개)
+https://drag-game.vercel.app
 
 ## 기술 스택
 
