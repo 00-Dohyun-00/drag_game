@@ -1,26 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useLogout } from "../hooks/useAuth";
+import { useGetRankingAPI } from "../api/scores";
 
 interface RankingPageProps {
   currentUser: string;
   onLogout: () => void;
 }
 
-// 임시 랭킹 데이터
-const mockRankingData = [
-  { rank: 1, username: "DragonMaster", score: 15420, streak: 12 },
-  { rank: 2, username: "PuzzleKing", score: 14580, streak: 8 },
-  { rank: 3, username: "GameMaster", score: 13750, streak: 6 },
-  { rank: 4, username: "SpeedRunner", score: 12900, streak: 9 },
-  { rank: 5, username: "ComboExpert", score: 11200, streak: 5 },
-  { rank: 6, username: "BlockDestroyer", score: 10800, streak: 7 },
-];
-
 const RankingPage: React.FC<RankingPageProps> = ({ onLogout }) => {
   const navigate = useNavigate();
 
   const { mutateAsync } = useLogout();
+  const { data: rankingData } = useGetRankingAPI();
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -112,45 +104,52 @@ const RankingPage: React.FC<RankingPageProps> = ({ onLogout }) => {
 
               {/* 랭킹 리스트 */}
               <div className="space-y-2">
-                {mockRankingData.map((player) => {
-                  const textStyles = getTextStyle(player.rank);
-                  return (
-                    <div
-                      key={player.rank}
-                      className={`flex items-center justify-between ${
-                        player.rank <= 3 ? "p-4" : "p-3"
-                      } rounded-xl ${getRankStyle(player.rank)}`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span
-                          className={`${
-                            player.rank <= 3
-                              ? "text-2xl"
-                              : "text-lg font-bold min-w-[30px]"
-                          }`}
-                        >
-                          {getRankIcon(player.rank)}
-                        </span>
-                        <div className="text-left">
-                          <h3 className={textStyles.username}>
-                            {player.username}
-                          </h3>
-                          <p className={textStyles.streak}>
-                            연속 {player.streak}회
-                          </p>
+                {rankingData?.map(
+                  (player: {
+                    rank: number;
+                    username: string;
+                    best_score: string;
+                    achieved_at: string;
+                  }) => {
+                    const textStyles = getTextStyle(player.rank);
+                    return (
+                      <div
+                        key={player.rank}
+                        className={`flex items-center justify-between ${
+                          player.rank <= 3 ? "p-4" : "p-3"
+                        } rounded-xl ${getRankStyle(player.rank)}`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span
+                            className={`${
+                              player.rank <= 3
+                                ? "text-2xl"
+                                : "text-lg font-bold min-w-[30px]"
+                            }`}
+                          >
+                            {getRankIcon(player.rank)}
+                          </span>
+                          <div className="text-left">
+                            <h3 className={textStyles.username}>
+                              {player.username}
+                            </h3>
+                            <p className={textStyles.streak}>
+                              {player.achieved_at.split("T")[0]}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={textStyles.score}>
+                            {player.best_score?.toLocaleString()}
+                          </div>
+                          {textStyles.scoreLabel && (
+                            <div className={textStyles.scoreLabel}>점수</div>
+                          )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className={textStyles.score}>
-                          {player.score.toLocaleString()}
-                        </div>
-                        {textStyles.scoreLabel && (
-                          <div className={textStyles.scoreLabel}>점수</div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
 
               <div className="flex mt-5 gap-2">

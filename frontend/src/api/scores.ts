@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "./config";
 import type { ApiResponse } from "./config";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // 점수 API용 공통 fetch 헬퍼 함수
 const scoresRequest = async <T>(
@@ -34,14 +34,14 @@ const scoresRequest = async <T>(
   return response.json();
 };
 
-// 점수 저장 요청 인터페이스
+// 점수 저장 훅
 export interface SaveScoreRequest {
   user_id: string;
   score: number;
 }
-
-// 점수 저장 훅
 export const useSaveScoreAPI = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     // 점수 저장 API
     mutationFn: async (data: SaveScoreRequest): Promise<ApiResponse<any>> => {
@@ -52,9 +52,24 @@ export const useSaveScoreAPI = () => {
     },
     onSuccess: (response) => {
       console.log("점수 저장 성공:", response);
+      // 점수 저장 후 랭킹 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ["ranking"] });
     },
     onError: (error) => {
       console.error("점수 저장 실패:", error);
     },
+  });
+};
+
+// 랭킹 조회 훅
+export const useGetRankingAPI = () => {
+  return useQuery({
+    queryKey: ["ranking"],
+    queryFn: async (): Promise<ApiResponse<any>> => {
+      return scoresRequest<any>("/scores/get_ranking", {
+        method: "GET",
+      });
+    },
+    select: (response) => response.data.ranking,
   });
 };
