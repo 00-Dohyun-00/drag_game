@@ -65,7 +65,7 @@ app.use(
       maxAge: 60 * 60 * 1000, // 세션 유지 시간 (1시간)
       secure: process.env.NODE_ENV === "production", // HTTPS에서만 쿠키 전송
       httpOnly: true, // XSS 방지
-      sameSite: "lax", // CSRF 방지
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // CSRF 방지
     },
     store: new PgSession({
       pool: pool,
