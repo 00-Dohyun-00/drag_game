@@ -34,7 +34,6 @@ function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
-  const [currentUser, setCurrentUser] = useState<string | null>(null); // 현재 로그인된 사용자의 이름
   const [currentUserInfo, setCurrentUserInfo] = useState<{
     username: string;
     id: string;
@@ -84,7 +83,7 @@ function AppContent() {
       if (meData?.success && meData.data?.user) {
         // 로그인된 상태
         setIsLoggedIn(true);
-        setCurrentUser(meData.data.user.username);
+
         setCurrentUserInfo(meData.data.user);
 
         // 로그인된 상태로 로그인/회원가입 페이지 접근 시 리다이렉트
@@ -96,7 +95,7 @@ function AppContent() {
         // 로그인되지 않은 상태
         const wasLoggedIn = isLoggedIn;
         setIsLoggedIn(false);
-        setCurrentUser(null);
+
         setCurrentUserInfo(null);
 
         // 보호된 페이지에서 세션 만료된 경우에만 알림
@@ -112,16 +111,16 @@ function AppContent() {
     }
   }, [meData, meLoading, location.pathname, isLoggedIn, navigate, meError]);
 
-  const handleLogin = async (username: string) => {
+  const handleLogin = async () => {
     setIsLoggedIn(true);
-    setCurrentUser(username);
+
     // 세션 정보 즉시 업데이트
     await meRefetch();
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    setCurrentUser(null);
+    setCurrentUserInfo(null);
   };
 
   // 초기화 중인 경우 로딩 표시
@@ -184,7 +183,7 @@ function AppContent() {
             isInitializing={isInitializing}
           >
             <RankingPage
-              currentUser={currentUser || ""}
+              currentUserInfo={currentUserInfo}
               onLogout={handleLogout}
             />
           </ProtectedRoute>

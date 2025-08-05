@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
 
 interface LoginPageProps {
-  onLogin: (username: string) => void;
+  onLogin: () => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -24,7 +24,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         {
           onSuccess: (response) => {
             if (response.success && !!response.data?.user) {
-              onLogin(response.data?.user.username);
+              onLogin();
               navigate("/drag-game");
             }
           },

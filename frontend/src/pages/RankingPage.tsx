@@ -4,11 +4,17 @@ import { useLogout } from "../hooks/useAuth";
 import { useGetRankingAPI } from "../api/scores";
 
 interface RankingPageProps {
-  currentUser: string;
+  currentUserInfo: {
+    username: string;
+    id: string;
+  } | null;
   onLogout: () => void;
 }
 
-const RankingPage: React.FC<RankingPageProps> = ({ onLogout }) => {
+const RankingPage: React.FC<RankingPageProps> = ({
+  currentUserInfo,
+  onLogout,
+}) => {
   const navigate = useNavigate();
 
   const { mutateAsync } = useLogout();
@@ -92,6 +98,10 @@ const RankingPage: React.FC<RankingPageProps> = ({ onLogout }) => {
             Drag Game
           </h1>
           <p className="text-white/80 text-lg">랭킹 순위를 확인하세요!</p>
+
+          <span className="flex items-center justify-center gap-4 text-white/80">
+            안녕하세요, {currentUserInfo?.username}님!
+          </span>
         </div>
 
         {/* Ranking Form */}
@@ -170,6 +180,24 @@ const RankingPage: React.FC<RankingPageProps> = ({ onLogout }) => {
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
                 >
                   로그아웃
+                </button>
+              </div>
+
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "정말로 회원탈퇴를 하시겠습니까? 게임 기록은 전부 삭제되며 이 작업은 되돌릴 수 없습니다."
+                      )
+                    ) {
+                      // TODO: 회원탈퇴 API 호출
+                      alert("회원탈퇴 기능은 준비 중입니다.");
+                    }
+                  }}
+                  className="text-[#8C7764]/60 text-xs hover:text-[#594A3C] hover:underline transition-colors duration-200"
+                >
+                  회원탈퇴
                 </button>
               </div>
             </div>

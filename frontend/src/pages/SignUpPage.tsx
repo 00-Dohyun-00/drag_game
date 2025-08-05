@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSignUp } from "../hooks/useAuth";
 
 interface SignUpPageProps {
-  onSignUp: (username: string) => void;
+  onSignUp: () => void;
 }
 
 const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
@@ -13,7 +13,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { mutateAsync } = useSignUp();
+  const { mutateAsync, isPending } = useSignUp();
 
   const isFormValid =
     username.trim() &&
@@ -37,7 +37,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
             onSuccess: (response) => {
               if (response.success && !!response.data?.user) {
                 alert("회원가입에 성공했습니다!");
-                onSignUp(response.data?.user.username);
+                onSignUp();
                 navigate("/ranking");
               }
             },
@@ -168,7 +168,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 disabled={!isFormValid}
               >
-                회원가입
+                {isPending ? "회원가입 중..." : "회원가입"}
               </button>
             </form>
 

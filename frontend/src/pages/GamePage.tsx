@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import GameOverModal from "../components/GameOverModal";
 import { useSaveScoreAPI } from "../api/scores";
+import { useNavigate } from "react-router-dom";
 
 const ROWS = 10;
 const COLS = 17;
@@ -18,6 +19,8 @@ interface GamePageProps {
 }
 
 const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
+  const navigate = useNavigate();
+
   const [board, setBoard] = useState<(number | null)[][]>([]);
   const [dragStart, setDragStart] = useState<{
     row: number;
@@ -126,31 +129,44 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
         <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
           Drag Game
         </h1>
-        <div className="flex items-center justify-center gap-4 text-white/80">
-          <span>안녕하세요, {currentUserInfo?.username}님!</span>
-        </div>
-      </div>
 
-      <p>
-        남은 시간 :&nbsp;
-        <span className="text-xl">{timeLeft}</span>
-        &nbsp;s
-      </p>
+        <span className="flex items-center justify-center gap-4 text-white/80">
+          이용자: {currentUserInfo?.username}
+        </span>
+      </div>
 
       <div>
         <div className="flex items-center justify-between w-full text-xl mb-4 text-white drop-shadow-md gap-4">
-          <p>점수: {score}</p>
+          <div className="flex flex-col items-start">
+            <p>점수: {score}</p>
 
-          <button
-            onClick={resetGame}
-            className="bg-[#F2E4DC] to-red-500 hover:from-red-500 hover:to-red-600 
-                   disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
-                   border-none px-3 py-2 rounded-2xl text-[#594A3C] text-base font-semibold 
-                   cursor-pointer my-4 transition-all duration-300 ease-in-out
-                   shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:hover:translate-y-0"
-          >
-            다시 시작하기
-          </button>
+            <p>
+              남은 시간 :&nbsp;
+              <span className="text-xl">{timeLeft}</span>
+              &nbsp;s
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={resetGame}
+              className="px-4 py-2 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white rounded-lg font-semibold text-sm
+                       hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
+                       shadow-md hover:shadow-lg hover:-translate-y-0.5
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
+            >
+              다시 시작하기
+            </button>
+            <button
+              onClick={() => navigate("/ranking")}
+              className="px-4 py-2 bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white rounded-lg font-semibold text-sm
+                       hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
+                       shadow-md hover:shadow-lg hover:-translate-y-0.5
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
+            >
+              나가기
+            </button>
+          </div>
         </div>
 
         <div
