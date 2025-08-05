@@ -15,44 +15,60 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
 
   const { mutateAsync, isPending } = useSignUp();
 
+  const validateUsername = (username: string) => {
+    return username.length >= 2 && username.length <= 20;
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 8 && /(?=.*[a-zA-Z])(?=.*\d)/.test(password);
+  };
+
   const isFormValid =
     username.trim() &&
     password.trim() &&
     confirmPassword.trim() &&
-    password === confirmPassword;
+    password === confirmPassword &&
+    validateUsername(username) &&
+    validatePassword(password);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim() && password.trim() && confirmPassword.trim()) {
-      if (password !== confirmPassword) {
-        alert("비밀번호가 일치하지 않습니다.");
-        return;
-      }
-
-      // 회원가입
-      if (username.trim() && password.trim()) {
-        mutateAsync(
-          { username, password },
-          {
-            onSuccess: (response) => {
-              if (response.success && !!response.data?.user) {
-                alert("회원가입에 성공했습니다!");
-                onSignUp();
-                navigate("/ranking");
-              }
-            },
-            onError: (error: Error & { status?: number }) => {
-              console.error("회원가입 에러:", error);
-              if (error?.status === 409) {
-                alert("이미 존재하는 계정입니다. 다른 아이디를 사용해주세요.");
-              } else {
-                alert("회원가입에 실패했습니다.");
-              }
-            },
-          }
-        );
-      }
+    
+    if (!validateUsername(username)) {
+      alert("아이디는 2자 이상 20자 이하로 입력해주세요.");
+      return;
     }
+
+    if (!validatePassword(password)) {
+      alert("비밀번호는 8자 이상이며, 영문자와 숫자를 포함해야 합니다.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    mutateAsync(
+      { username, password },
+      {
+        onSuccess: (response) => {
+          if (response.success && !!response.data?.user) {
+            alert("회원가입에 성공했습니다!");
+            onSignUp();
+            navigate("/ranking");
+          }
+        },
+        onError: (error: Error & { status?: number }) => {
+          console.error("회원가입 에러:", error);
+          if (error?.status === 409) {
+            alert("이미 존재하는 계정입니다. 다른 아이디를 사용해주세요.");
+          } else {
+            alert("회원가입에 실패했습니다.");
+          }
+        },
+      }
+    );
   };
 
   const handleSwitchToLogin = () => {
@@ -96,13 +112,22 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
                   id="signup-username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#D9C6BA]/50 
+                  className={`w-full px-4 py-3 rounded-xl border 
                          bg-white/80 text-[#594A3C] placeholder-[#8C7764]/60
-                         focus:outline-none focus:ring-2 focus:ring-[#8C7764]/50 focus:border-transparent
-                         transition-all duration-300"
-                  placeholder="사용할 아이디를 입력하세요"
+                         focus:outline-none focus:ring-2 transition-all duration-300
+                         ${
+                           username && !validateUsername(username)
+                             ? "border-red-300 focus:ring-red-400/50"
+                             : "border-[#D9C6BA]/50 focus:ring-[#8C7764]/50 focus:border-transparent"
+                         }`}
+                  placeholder="사용할 아이디를 입력하세요 (2-20자)"
                   required
                 />
+                {username && !validateUsername(username) && (
+                  <p className="text-red-500 text-xs mt-1">
+                    아이디는 2자 이상 20자 이하로 입력해주세요.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -117,13 +142,22 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
                   id="signup-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#D9C6BA]/50 
+                  className={`w-full px-4 py-3 rounded-xl border 
                          bg-white/80 text-[#594A3C] placeholder-[#8C7764]/60
-                         focus:outline-none focus:ring-2 focus:ring-[#8C7764]/50 focus:border-transparent
-                         transition-all duration-300"
-                  placeholder="비밀번호를 입력하세요"
+                         focus:outline-none focus:ring-2 transition-all duration-300
+                         ${
+                           password && !validatePassword(password)
+                             ? "border-red-300 focus:ring-red-400/50"
+                             : "border-[#D9C6BA]/50 focus:ring-[#8C7764]/50 focus:border-transparent"
+                         }`}
+                  placeholder="비밀번호를 입력하세요 (8자 이상, 영문+숫자)"
                   required
                 />
+                {password && !validatePassword(password) && (
+                  <p className="text-red-500 text-xs mt-1">
+                    비밀번호는 8자 이상이며, 영문자와 숫자를 포함해야 합니다.
+                  </p>
+                )}
               </div>
 
               <div>
