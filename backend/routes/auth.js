@@ -43,7 +43,7 @@ router.post("/signup", async (req, res) => {
         console.error("자동 로그인 실패:", err);
         return res.status(500).json({
           success: false,
-          message: "회원가입은 성공했으나 로그인 실패"
+          message: "회원가입은 성공했으나 로그인 실패",
         });
       }
 
@@ -126,6 +126,65 @@ router.post("/logout", (req, res) => {
       res.json({ success: true, message: "로그아웃 성공" });
     });
   });
+});
+
+// 회원탈퇴
+router.delete("/delete", async (req, res) => {
+  console.log("=== /auth/delete 요청 받음 ===");
+
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({
+      success: false,
+      message: "로그인이 필요합니다",
+    });
+  }
+
+  try {
+    const userId = req.user.id;
+
+    // users 테이블에서 삭제 (CASCADE로 관련 데이터도 자동 삭제)
+    const result = await pool.query(
+      "DELETE FROM users WHERE id = $1 RETURNING username",
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "사용자를 찾을 수 없습니다",
+      });
+    }
+
+    const deletedUsername = result.rows[0].username;
+
+    // 로그아웃 처리
+    req.logout((err) => {
+      if (err) {
+        console.error("로그아웃 처리 실패:", err);
+      }
+
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("세션 삭제 실패:", err);
+        }
+
+        res.clearCookie("connect.sid");
+        res.json({
+          success: true,
+          message: "회원탈퇴가 완료되었습니다",
+          data: {
+            deletedUser: deletedUsername,
+          },
+        });
+      });
+    });
+  } catch (error) {
+    console.error("회원탈퇴 오류:", error);
+    res.status(500).json({
+      success: false,
+      message: "서버 오류가 발생했습니다",
+    });
+  }
 });
 
 export default router;
