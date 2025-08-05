@@ -12,7 +12,7 @@ import rateLimit from "express-rate-limit";
 
 const PgSession = connectPgSimple(session);
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 // 필수 환경변수 검증
 const requiredEnvVars = ["FRONTEND_URL", "SESSION_SECRET", "DATABASE_URL"];
