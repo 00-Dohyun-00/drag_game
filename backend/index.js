@@ -12,7 +12,7 @@ import rateLimit from "express-rate-limit";
 
 const PgSession = connectPgSimple(session);
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 // Render 프록시 설정 (rate limit 에러 해결)
 if (process.env.NODE_ENV === "production") {
