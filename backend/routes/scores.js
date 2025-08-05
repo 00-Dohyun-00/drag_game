@@ -65,4 +65,45 @@ router.post("/save_score", async (req, res) => {
   }
 });
 
+// 랭킹 조회
+router.get("/get_ranking", async (req, res) => {
+  console.log("=== /score/get_ranking 요청 받음 ===");
+
+  try {
+    // 최고점수 상위 6명 조회 (rank 포함, users 테이블과 JOIN해서 username 가져오기)
+    const rankingResult = await pool.query(
+      `SELECT 
+        ROW_NUMBER() OVER (ORDER BY ubs.best_score DESC) as rank,
+        ubs.user_id, 
+        ubs.best_score, 
+        ubs.achieved_at,
+        u.username
+      FROM user_best_scores ubs
+      JOIN users u ON ubs.user_id = u.id
+      ORDER BY ubs.best_score DESC
+      LIMIT 6`
+    );
+
+    // rank를 number 타입으로 변환
+    const ranking = rankingResult.rows.map((row) => ({
+      ...row,
+      rank: parseInt(row.rank),
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "랭킹 조회 성공",
+      data: {
+        ranking: ranking,
+      },
+    });
+  } catch (error) {
+    console.error("랭킹 조회 오류:", error);
+    res.status(500).json({
+      success: false,
+      message: "서버 오류가 발생했습니다",
+    });
+  }
+});
+
 export default router;
