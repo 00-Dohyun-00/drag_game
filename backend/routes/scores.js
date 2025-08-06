@@ -5,7 +5,7 @@ const router = express.Router();
 
 // 점수 저장
 router.post("/save_score", async (req, res) => {
-  console.log("=== /score/save_score 요청 받음 ===");
+  console.log("=== /scores/save_score 요청 받음 ===");
   console.log("req.body:", req.body);
 
   try {
