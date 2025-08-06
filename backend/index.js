@@ -9,6 +9,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import connectPgSimple from "connect-pg-simple";
 import rateLimit from "express-rate-limit";
+import commentRouter from "./routes/comment.js";
 
 const PgSession = connectPgSimple(session);
 const app = express();
@@ -159,6 +160,7 @@ passport.deserializeUser(async (user, done) => {
 
 app.use("/auth", authLimiter, authRouter); // 인증 API에 더 엄격한 제한
 app.use("/scores", scoresRouter);
+app.use("/comments", commentRouter);
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
