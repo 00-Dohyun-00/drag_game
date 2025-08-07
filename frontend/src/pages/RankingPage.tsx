@@ -130,7 +130,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="w-full max-w-6xl">
+      <div className="w-full max-w-5xl">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
             Drag Game
@@ -144,7 +144,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
 
         <div className="flex gap-6 h-[600px]">
           {/* Ranking Form */}
-          <section className="flex-1">
+          <section className="w-3/5">
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 h-full flex flex-col">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-[#594A3C] mb-4">
@@ -200,8 +200,11 @@ const RankingPage: React.FC<RankingPageProps> = ({
                     }
                   )}
                 </div>
+              </div>
 
-                <div className="flex mt-5 gap-2">
+              {/* 버튼들을 컨테이너 하단에 고정 */}
+              <div className="mt-auto pt-4">
+                <div className="flex gap-2">
                   <button
                     className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
                        hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
@@ -243,7 +246,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
             </div>
           </section>
           {/* 코멘트 섹션 */}
-          <section className="flex-1">
+          <section className="w-2/5">
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 h-full flex flex-col">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-[#594A3C] mb-4">
