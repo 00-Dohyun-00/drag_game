@@ -270,11 +270,9 @@ const RankingPage: React.FC<RankingPageProps> = ({
           {/* 코멘트 섹션 */}
           <section className="w-2/5">
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 h-full flex flex-col">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-[#594A3C] mb-4">
-                  💬 유저들의 한마디
-                </h3>
-              </div>
+              <h3 className="text-2xl font-bold text-[#594A3C] mb-4">
+                💬 User Comments
+              </h3>
 
               {/* 코멘트 입력 */}
               {isLoggedIn && (
