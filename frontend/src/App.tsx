@@ -26,8 +26,9 @@ const queryClient = new QueryClient({
 });
 
 // 상수로 정의 (컴포넌트 외부)
-const PROTECTED_ROUTES = ["/drag-game", "/ranking"];
+const PROTECTED_ROUTES = ["/drag-game"];
 const AUTH_PAGES = ["/login", "/signin"];
+const NEED_CHECK_ROUTES = ["/ranking"];
 
 // 메인 앱 컴포넌트 (QueryClient와 Router 내부에서 실행)
 function AppContent() {
@@ -52,18 +53,14 @@ function AppContent() {
   useEffect(() => {
     const checkInitialSession = async () => {
       const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
+      const isAuthPage = AUTH_PAGES.includes(location.pathname);
+      const isNeedCheckRoute = NEED_CHECK_ROUTES.includes(location.pathname);
 
-      if (isProtectedRoute) {
+      if (isProtectedRoute || isAuthPage || isNeedCheckRoute) {
         await meRefetch();
       } else {
-        // 로그인/회원가입 페이지의 경우 - 로그인 상태 확인 후 리다이렉트
-        const isAuthPage = AUTH_PAGES.includes(location.pathname);
-        if (isAuthPage) {
-          await meRefetch();
-        } else {
-          // 기타 페이지는 즉시 초기화 완료
-          setIsInitializing(false);
-        }
+        // 기타 페이지는 즉시 초기화 완료
+        setIsInitializing(false);
       }
     };
 
@@ -74,9 +71,10 @@ function AppContent() {
   useEffect(() => {
     const isProtectedRoute = PROTECTED_ROUTES.includes(location.pathname);
     const isAuthPage = AUTH_PAGES.includes(location.pathname);
+    const isNeedCheckRoute = NEED_CHECK_ROUTES.includes(location.pathname);
 
     if (
-      (isProtectedRoute || isAuthPage) &&
+      (isProtectedRoute || isAuthPage || isNeedCheckRoute) &&
       !meLoading &&
       (meData !== undefined || meError)
     ) {
@@ -134,8 +132,8 @@ function AppContent() {
 
   return (
     <Routes>
-      {/* 기본 경로 로그인으로 리다이렉트 */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* 기본 경로 랭킹 페이지로 리다이렉트 */}
+      <Route path="/" element={<Navigate to="/ranking" replace />} />
 
       {/* 로그인 페이지 */}
       <Route
@@ -178,15 +176,10 @@ function AppContent() {
       <Route
         path="/ranking"
         element={
-          <ProtectedRoute
-            isLoggedIn={isLoggedIn}
-            isInitializing={isInitializing}
-          >
-            <RankingPage
-              currentUserInfo={currentUserInfo}
-              onLogout={handleLogout}
-            />
-          </ProtectedRoute>
+          <RankingPage
+            currentUserInfo={currentUserInfo}
+            onLogout={handleLogout}
+          />
         }
       />
 

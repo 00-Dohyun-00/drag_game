@@ -19,6 +19,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const [comment, setComment] = useState("");
+  const isLoggedIn = !!currentUserInfo;
 
   const { mutateAsync } = useLogout();
   const { data: rankingData } = useGetRankingAPI();
@@ -135,10 +136,14 @@ const RankingPage: React.FC<RankingPageProps> = ({
           <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
             Drag Game
           </h1>
-          <p className="text-white/80 text-lg">랭킹 순위를 확인하세요!</p>
+          <p className="text-white/80 text-lg">
+            안녕하세요, {currentUserInfo?.username ?? "게스트"}님!
+          </p>
 
           <span className="flex items-center justify-center gap-4 text-white/80">
-            안녕하세요, {currentUserInfo?.username}님!
+            {isLoggedIn
+              ? "랭킹 순위를 확인하세요!"
+              : "로그인 후 랭킹에 도전해보세요!"}
           </span>
         </div>
 
@@ -203,46 +208,63 @@ const RankingPage: React.FC<RankingPageProps> = ({
               </div>
 
               {/* 버튼들을 컨테이너 하단에 고정 */}
-              <div className="mt-auto pt-4">
-                <div className="flex gap-2">
-                  <button
-                    className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
+              {!isLoggedIn && (
+                <div className="mt-auto pt-4">
+                  <div className="flex gap-2">
+                    <button
+                      className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
                        hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
                        shadow-lg hover:shadow-xl hover:-translate-y-1
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
-                    onClick={() => navigate("/drag-game")}
-                  >
-                    게임시작
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="shrink-3 w-full bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white py-3 rounded-xl font-semibold
+                      onClick={() => navigate("/login")}
+                    >
+                      로그인/회원가입 하고 게임 시작하기
+                    </button>
+                  </div>
+                </div>
+              )}
+              {isLoggedIn && (
+                <div className="mt-auto pt-4">
+                  <div className="flex gap-2">
+                    <button
+                      className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
+                       hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
+                       shadow-lg hover:shadow-xl hover:-translate-y-1
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
+                      onClick={() => navigate("/drag-game")}
+                    >
+                      게임시작
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="shrink-3 w-full bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white py-3 rounded-xl font-semibold
                        hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
                        shadow-lg hover:shadow-xl hover:-translate-y-1
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
-                  >
-                    로그아웃
-                  </button>
-                </div>
+                    >
+                      로그아웃
+                    </button>
+                  </div>
 
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "정말로 회원탈퇴를 하시겠습니까? 게임 기록은 전부 삭제되며 이 작업은 되돌릴 수 없습니다."
-                        )
-                      ) {
-                        // TODO: 회원탈퇴 API 호출
-                        alert("회원탈퇴 기능은 준비 중입니다.");
-                      }
-                    }}
-                    className="text-[#8C7764]/60 text-xs hover:text-[#594A3C] hover:underline transition-colors duration-200"
-                  >
-                    회원탈퇴
-                  </button>
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "정말로 회원탈퇴를 하시겠습니까? 게임 기록은 전부 삭제되며 이 작업은 되돌릴 수 없습니다."
+                          )
+                        ) {
+                          // TODO: 회원탈퇴 API 호출
+                          alert("회원탈퇴 기능은 준비 중입니다.");
+                        }
+                      }}
+                      className="text-[#8C7764]/60 text-xs hover:text-[#594A3C] hover:underline transition-colors duration-200"
+                    >
+                      회원탈퇴
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </section>
           {/* 코멘트 섹션 */}
@@ -250,36 +272,38 @@ const RankingPage: React.FC<RankingPageProps> = ({
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 h-full flex flex-col">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-[#594A3C] mb-4">
-                  💬 한마디
+                  💬 유저들의 한마디
                 </h3>
               </div>
 
               {/* 코멘트 입력 */}
-              <div className="mb-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="간단한 메시지를 남겨보세요!"
-                    className="flex-1 px-3 py-2 border border-[#D9C6BA]/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8C7764]/50"
-                    maxLength={50}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleCommentSubmit();
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={handleCommentSubmit}
-                    disabled={!comment.trim() || isPendingComment}
-                    className="px-4 py-2 bg-[#8C7764] text-white rounded-lg text-sm font-medium hover:bg-[#594A3C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    등록
-                  </button>
+              {isLoggedIn && (
+                <div className="mb-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="간단한 메시지를 남겨보세요!"
+                      className="flex-1 px-3 py-2 border border-[#D9C6BA]/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8C7764]/50"
+                      maxLength={50}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCommentSubmit();
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleCommentSubmit}
+                      disabled={!comment.trim() || isPendingComment}
+                      className="px-4 py-2 bg-[#8C7764] text-white rounded-lg text-sm font-medium hover:bg-[#594A3C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      등록
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* 코멘트 목록 */}
               <div className="space-y-2 flex-1 overflow-y-auto">
