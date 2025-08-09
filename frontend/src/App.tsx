@@ -14,6 +14,7 @@ import SignUpPage from "./pages/SignUpPage";
 import GamePage from "./pages/GamePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RankingPage from "./pages/RankingPage";
+import MyPage from "./pages/MyPage";
 
 // QueryClient 설정
 const queryClient = new QueryClient({
@@ -28,7 +29,7 @@ const queryClient = new QueryClient({
 // 상수로 정의 (컴포넌트 외부)
 const PROTECTED_ROUTES = ["/drag-game"];
 const AUTH_PAGES = ["/login", "/signin"];
-const NEED_CHECK_ROUTES = ["/ranking"];
+const NEED_CHECK_ROUTES = ["/ranking", "/mypage"];
 
 // 메인 앱 컴포넌트 (QueryClient와 Router 내부에서 실행)
 function AppContent() {
@@ -38,6 +39,7 @@ function AppContent() {
   const [currentUserInfo, setCurrentUserInfo] = useState<{
     username: string;
     id: string;
+    nickname?: string;
   } | null>(null); // 현재 로그인된 사용자 정보
   const [isInitializing, setIsInitializing] = useState(true); // 앱 초기화 중인지 여부 - 세션 확인이 완료될 때까지 true
 
@@ -180,6 +182,19 @@ function AppContent() {
             currentUserInfo={currentUserInfo}
             onLogout={handleLogout}
           />
+        }
+      />
+
+      {/* 마이페이지 */}
+      <Route
+        path="/mypage"
+        element={
+          <ProtectedRoute
+            isLoggedIn={isLoggedIn}
+            isInitializing={isInitializing}
+          >
+            <MyPage currentUserInfo={currentUserInfo} />
+          </ProtectedRoute>
         }
       />
 

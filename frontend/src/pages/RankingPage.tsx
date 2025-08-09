@@ -130,7 +130,18 @@ const RankingPage: React.FC<RankingPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center p-8 relative">
+      {/* 마이페이지 버튼 - 오른쪽 상단 */}
+      {isLoggedIn && (
+        <button
+          onClick={() => navigate("/mypage")}
+          className="absolute top-8 right-8 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-4 py-2 rounded-xl font-semibold
+           hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
+           shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer z-10"
+        >
+          마이페이지
+        </button>
+      )}
       <div className="w-full max-w-5xl">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">

@@ -139,17 +139,40 @@ router.post("/login", (req, res, next) => {
 });
 
 // 현재 사용자 정보 조회
-router.get("/me", (req, res) => {
+router.get("/me", async (req, res) => {
   if (req.isAuthenticated()) {
-    res.json({
-      success: true,
-      data: {
-        user: {
-          id: req.user.id,
-          username: req.user.username,
+    try {
+      // 데이터베이스에서 최신 사용자 정보 조회 (nickname 포함)
+      const userResult = await pool.query(
+        "SELECT id, username, nickname FROM users WHERE id = $1",
+        [req.user.id]
+      );
+
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "사용자를 찾을 수 없습니다",
+        });
+      }
+
+      const user = userResult.rows[0];
+      res.json({
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            nickname: user.nickname,
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.error("사용자 정보 조회 오류:", error);
+      res.status(500).json({
+        success: false,
+        message: "서버 오류가 발생했습니다",
+      });
+    }
   } else {
     res.status(401).json({
       success: false,
