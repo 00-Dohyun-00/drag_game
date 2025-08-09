@@ -7,7 +7,7 @@ import { debounce } from "lodash-es";
 interface MyPageProps {
   currentUserInfo: {
     username: string;
-    nickname?: string;
+    nickname: string | null;
     id: string;
   } | null;
 }
@@ -121,7 +121,8 @@ const MyPage: React.FC<MyPageProps> = ({ currentUserInfo }) => {
             My Page
           </h1>
           <p className="text-white/80 text-lg">
-            {currentUserInfo?.username}님의 게임 기록
+            {`${currentUserInfo?.nickname || ""}(${currentUserInfo?.username})`}
+            님의 게임 기록
           </p>
         </div>
 

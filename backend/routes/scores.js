@@ -70,14 +70,15 @@ router.get("/get_ranking", async (req, res) => {
   console.log("=== /score/get_ranking 요청 받음 ===");
 
   try {
-    // 최고점수 상위 6명 조회 (rank 포함, users 테이블과 JOIN해서 username 가져오기)
+    // 최고점수 상위 6명 조회 (rank 포함, users 테이블과 JOIN해서 username, nickname 가져오기)
     const rankingResult = await pool.query(
       `SELECT 
         ROW_NUMBER() OVER (ORDER BY ubs.best_score DESC) as rank,
         ubs.user_id, 
         ubs.best_score, 
         ubs.achieved_at,
-        u.username
+        u.username,
+        u.nickname
       FROM user_best_scores ubs
       JOIN users u ON ubs.user_id = u.id
       ORDER BY ubs.best_score DESC

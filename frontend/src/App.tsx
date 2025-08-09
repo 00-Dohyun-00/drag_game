@@ -39,7 +39,7 @@ function AppContent() {
   const [currentUserInfo, setCurrentUserInfo] = useState<{
     username: string;
     id: string;
-    nickname?: string;
+    nickname: string | null;
   } | null>(null); // 현재 로그인된 사용자 정보
   const [isInitializing, setIsInitializing] = useState(true); // 앱 초기화 중인지 여부 - 세션 확인이 완료될 때까지 true
 

@@ -93,7 +93,8 @@ router.get("/get_comment", async (req, res) => {
         c.user_id, 
         c.text, 
         c.created_at,
-        u.username
+        u.username,
+        u.nickname
       FROM comments c
       JOIN users u ON c.user_id = u.id
       ORDER BY c.created_at DESC`
@@ -103,6 +104,7 @@ router.get("/get_comment", async (req, res) => {
       id: comment.id,
       user_id: comment.user_id,
       username: comment.username,
+      nickname: comment.nickname,
       text: comment.text,
       created_at: comment.created_at,
     }));

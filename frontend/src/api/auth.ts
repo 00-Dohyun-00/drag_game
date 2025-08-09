@@ -37,6 +37,7 @@ const authRequest = async <T>(
 export interface User {
   id: string;
   username: string;
+  nickname: string | null;
   createdAt: string;
 }
 

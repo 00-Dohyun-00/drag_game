@@ -14,6 +14,7 @@ function getRandomNumber() {
 interface GamePageProps {
   currentUserInfo: {
     username: string;
+    nickname: string | null;
     id: string;
   } | null;
 }
@@ -134,7 +135,8 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
         </h1>
 
         <span className="flex items-center justify-center gap-4 text-white/80">
-          이용자: {currentUserInfo?.username}
+          이용자:
+          {`${currentUserInfo?.nickname || ""}(${currentUserInfo?.username})`}
         </span>
       </div>
 

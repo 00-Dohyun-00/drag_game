@@ -9,6 +9,7 @@ interface RankingPageProps {
   currentUserInfo: {
     username: string;
     id: string;
+    nickname: string | null;
   } | null;
   onLogout: () => void;
 }
@@ -148,7 +149,11 @@ const RankingPage: React.FC<RankingPageProps> = ({
             Drag Game
           </h1>
           <p className="text-white/80 text-lg">
-            안녕하세요, {currentUserInfo?.username ?? "게스트"}님!
+            안녕하세요,{" "}
+            {currentUserInfo
+              ? `${currentUserInfo.nickname || ""}(${currentUserInfo.username})`
+              : "게스트"}
+            님!
           </p>
 
           <span className="flex items-center justify-center gap-4 text-white/80">
@@ -173,6 +178,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                     (player: {
                       rank: number;
                       username: string;
+                      nickname: string;
                       best_score: string;
                       achieved_at: string;
                     }) => {
@@ -196,7 +202,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                             </span>
                             <div className="text-left">
                               <h3 className={textStyles.username}>
-                                {player.username}
+                                {`${player.nickname || ""}(${player.username})`}
                               </h3>
                               <p className={textStyles.streak}>
                                 {player.achieved_at.split("T")[0]}
@@ -325,7 +331,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-[#594A3C] text-sm">
-                            {item.username}
+                            {`${item.nickname || ""}(${item.username})`}
                           </span>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-[#8C7764]/60">
