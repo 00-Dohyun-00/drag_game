@@ -123,4 +123,57 @@ router.get("/get_comment", async (req, res) => {
   }
 });
 
+// 한마디 삭제
+router.delete("/delete_comment", async (req, res) => {
+  console.log("=== /comments/delete_comment 요청 받음 ===");
+
+  try {
+    const { user_id, comment_id } = req.body;
+
+    // 입력 검증
+    if (!comment_id || !user_id) {
+      return res.status(400).json({
+        success: false,
+        message: "파라미터 확인",
+      });
+    }
+
+    // 댓글 존재 여부 및 소유자 확인
+    const commentCheck = await pool.query(
+      "SELECT user_id FROM comments WHERE id = $1",
+      [comment_id]
+    );
+
+    if (commentCheck.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "해당 글을 찾을 수 없습니다",
+      });
+    }
+
+    // 글 작성자와 삭제 요청자가 같은지 확인
+    const commentOwnerId = commentCheck.rows[0].user_id;
+    if (commentOwnerId !== parseInt(user_id)) {
+      return res.status(403).json({
+        success: false,
+        message: "본인이 작성한 글만 삭제할 수 있습니다",
+      });
+    }
+
+    // 글 삭제
+    await pool.query("DELETE FROM comments WHERE id = $1", [comment_id]);
+
+    res.status(200).json({
+      success: true,
+      message: "댓글이 성공적으로 삭제되었습니다",
+    });
+  } catch (error) {
+    console.error("댓글 삭제 오류:", error);
+    res.status(500).json({
+      success: false,
+      message: "서버 오류가 발생했습니다",
+    });
+  }
+});
+
 export default router;
