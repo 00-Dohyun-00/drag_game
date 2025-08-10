@@ -104,11 +104,11 @@ const MyPage: React.FC<MyPageProps> = ({ currentUserInfo }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 relative">
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 relative">
       {/* 뒤로가기 버튼 - 왼쪽 상단 */}
       <button
         onClick={() => navigate("/ranking")}
-        className="absolute top-8 left-8 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-4 py-2 rounded-xl font-semibold
+        className="absolute top-4 left-4 md:top-8 md:left-8 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-3 py-2 md:px-4 md:py-2 rounded-xl font-semibold text-sm md:text-base
          hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
          shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer z-10"
       >
@@ -116,11 +116,11 @@ const MyPage: React.FC<MyPageProps> = ({ currentUserInfo }) => {
       </button>
 
       <div className="w-full max-w-6xl">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
             My Page
           </h1>
-          <p className="text-white/80 text-lg">
+          <p className="text-white/80 text-base md:text-lg">
             {`${currentUserInfo?.nickname || ""}(${currentUserInfo?.username})`}
             님의 게임 기록
           </p>

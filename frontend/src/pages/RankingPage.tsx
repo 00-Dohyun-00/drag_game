@@ -131,12 +131,12 @@ const RankingPage: React.FC<RankingPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 relative">
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 relative">
       {/* 마이페이지 버튼 - 오른쪽 상단 */}
       {isLoggedIn && (
         <button
           onClick={() => navigate("/mypage")}
-          className="absolute top-8 right-8 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-4 py-2 rounded-xl font-semibold
+          className="absolute top-4 right-4 md:top-8 md:right-8 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-3 py-2 md:px-4 md:py-2 rounded-xl font-semibold text-sm md:text-base
            hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
            shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer z-10"
         >
@@ -144,11 +144,11 @@ const RankingPage: React.FC<RankingPageProps> = ({
         </button>
       )}
       <div className="w-full max-w-5xl">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-4">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
             Drag Game
           </h1>
-          <p className="text-white/80 text-lg">
+          <p className="text-white/80 text-base md:text-lg">
             안녕하세요,{" "}
             {currentUserInfo
               ? `${currentUserInfo.nickname || ""}(${currentUserInfo.username})`
@@ -156,19 +156,19 @@ const RankingPage: React.FC<RankingPageProps> = ({
             님!
           </p>
 
-          <span className="flex items-center justify-center gap-4 text-white/80">
+          <span className="flex items-center justify-center gap-4 text-white/80 text-sm md:text-base">
             {isLoggedIn
               ? "랭킹 순위를 확인하세요!"
               : "로그인 후 랭킹에 도전해보세요!"}
           </span>
         </div>
 
-        <div className="flex gap-6 h-[600px]">
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-6 min-h-[500px] md:h-[600px]">
           {/* Ranking Form */}
-          <section className="w-3/5">
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 h-full flex flex-col">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-[#594A3C] mb-4">
+          <section className="w-full lg:w-3/5">
+            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-6 shadow-2xl border border-white/20 h-full flex flex-col">
+              <div className="text-center mb-4 md:mb-6">
+                <h2 className="text-xl md:text-2xl font-bold text-[#594A3C] mb-4">
                   🏆 Top Rankings
                 </h2>
 
@@ -187,34 +187,34 @@ const RankingPage: React.FC<RankingPageProps> = ({
                         <div
                           key={player.rank}
                           className={`flex items-center justify-between ${
-                            player.rank <= 3 ? "p-4" : "p-3"
+                            player.rank <= 3 ? "p-3 md:p-4" : "p-2 md:p-3"
                           } rounded-xl ${getRankStyle(player.rank)}`}
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                             <span
                               className={`${
                                 player.rank <= 3
-                                  ? "text-2xl"
-                                  : "text-lg font-bold min-w-[30px]"
-                              }`}
+                                  ? "text-xl md:text-2xl"
+                                  : "text-sm md:text-lg font-bold min-w-[25px] md:min-w-[30px]"
+                              } flex-shrink-0`}
                             >
                               {getRankIcon(player.rank)}
                             </span>
-                            <div className="text-left">
-                              <h3 className={textStyles.username}>
+                            <div className="text-left min-w-0 flex-1">
+                              <h3 className={`${textStyles.username} text-sm md:text-base lg:text-lg truncate`}>
                                 {`${player.nickname || ""}(${player.username})`}
                               </h3>
-                              <p className={textStyles.streak}>
+                              <p className={`${textStyles.streak} text-xs md:text-sm`}>
                                 {player.achieved_at.split("T")[0]}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className={textStyles.score}>
+                          <div className="text-right flex-shrink-0">
+                            <div className={`${textStyles.score} text-sm md:text-lg lg:text-xl`}>
                               {player.best_score?.toLocaleString()}
                             </div>
                             {textStyles.scoreLabel && (
-                              <div className={textStyles.scoreLabel}>점수</div>
+                              <div className={`${textStyles.scoreLabel} text-xs md:text-sm`}>점수</div>
                             )}
                           </div>
                         </div>
@@ -229,7 +229,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                 <div className="mt-auto pt-4">
                   <div className="flex gap-2">
                     <button
-                      className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
+                      className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base
                        hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
                        shadow-lg hover:shadow-xl hover:-translate-y-1
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
@@ -242,9 +242,9 @@ const RankingPage: React.FC<RankingPageProps> = ({
               )}
               {isLoggedIn && (
                 <div className="mt-auto pt-4">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
-                      className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-3 rounded-xl font-semibold
+                      className="shrink w-full bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base
                        hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
                        shadow-lg hover:shadow-xl hover:-translate-y-1
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
@@ -254,7 +254,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="shrink-3 w-full bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white py-3 rounded-xl font-semibold
+                      className="shrink-3 w-full bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white py-2 md:py-3 rounded-xl font-semibold text-sm md:text-base
                        hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
                        shadow-lg hover:shadow-xl hover:-translate-y-1
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
@@ -285,16 +285,16 @@ const RankingPage: React.FC<RankingPageProps> = ({
             </div>
           </section>
           {/* 코멘트 섹션 */}
-          <section className="w-2/5">
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20 h-full flex flex-col">
-              <h3 className="text-2xl font-bold text-[#594A3C] mb-4">
+          <section className="w-full lg:w-2/5">
+            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-6 shadow-2xl border border-white/20 h-full flex flex-col">
+              <h3 className="text-xl md:text-2xl font-bold text-[#594A3C] mb-4">
                 💬 User Comments
               </h3>
 
               {/* 코멘트 입력 */}
               {isLoggedIn && (
                 <div className="mb-4">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       value={comment}
@@ -312,7 +312,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                     <button
                       onClick={handleCommentSubmit}
                       disabled={!comment.trim() || isPendingComment}
-                      className="px-4 py-2 bg-[#8C7764] text-white rounded-lg text-sm font-medium hover:bg-[#594A3C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      className="px-4 py-2 bg-[#8C7764] text-white rounded-lg text-sm font-medium hover:bg-[#594A3C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer w-full sm:w-auto"
                     >
                       등록
                     </button>
@@ -325,15 +325,15 @@ const RankingPage: React.FC<RankingPageProps> = ({
                 {commentsData?.map((item: any) => (
                   <div
                     key={item.id}
-                    className="bg-[#F5F0EA] p-2 rounded-lg px-3"
+                    className="bg-[#F5F0EA] p-3 rounded-lg"
                   >
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-[#594A3C] text-sm">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-[#594A3C] text-xs md:text-sm truncate">
                             {`${item.nickname || ""}(${item.username})`}
                           </span>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="text-xs text-[#8C7764]/60">
                               {/* TODO: 시간대 수정 */}
                               {/* {new Date(item.created_at).toLocaleString(
@@ -358,7 +358,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
                             </button> */}
                           </div>
                         </div>
-                        <p className="text-[#594A3C] text-sm mt-1">
+                        <p className="text-[#594A3C] text-xs md:text-sm break-words">
                           {item.text}
                         </p>
                       </div>
