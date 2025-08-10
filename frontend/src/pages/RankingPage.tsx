@@ -5,6 +5,7 @@ import { useGetRankingAPI } from "../api/scores";
 import { useGetCommentsAPI, useSaveCommentAPI } from "../api/comments";
 import { debounce } from "lodash-es";
 import InstallPWAButton from "../components/buttons/InstallPWAButton";
+import { isMobile } from "../utils/device";
 
 interface RankingPageProps {
   currentUserInfo: {
@@ -21,9 +22,6 @@ const RankingPage: React.FC<RankingPageProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const mobileSizeBase = 768;
-  const isMobile =
-    "ontouchstart" in window || window.innerWidth < mobileSizeBase;
   const [comment, setComment] = useState("");
   const isLoggedIn = !!currentUserInfo;
 
@@ -146,7 +144,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
            hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
            shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
           >
-            {isMobile ? "🏠" : "마이페이지"}
+            {isMobile() ? "🏠" : "마이페이지"}
           </button>
         )}
 

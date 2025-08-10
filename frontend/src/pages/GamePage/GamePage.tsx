@@ -3,6 +3,7 @@ import GameOverModal from "../../components/GameOverModal";
 import { useSaveScoreAPI } from "../../api/scores";
 import { useNavigate } from "react-router-dom";
 import * as S from "./styles";
+import { MOBILE_SIZE_BASE } from "../../utils/device";
 
 const ROWS = 10;
 const COLS = 17;
@@ -22,7 +23,6 @@ interface GamePageProps {
 
 const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const navigate = useNavigate();
-  const mobileSizeBase = 768;
 
   const [board, setBoard] = useState<(number | null)[][]>([]);
   const [dragStart, setDragStart] = useState<{
@@ -36,7 +36,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const [isPortrait, setIsPortrait] = useState(false); // 가로모드, 세로모드 판단
   const [isMobile, setIsMobile] = useState(
-    "ontouchstart" in window || window.innerWidth < mobileSizeBase
+    "ontouchstart" in window || window.innerWidth < MOBILE_SIZE_BASE
   );
   const [_orientationKey, setOrientationKey] = useState(0); // 강제 리랜더링 위한 함수(모바일 세로모드 모달 문제)
   const timerRef = useRef<number | null>(null);
@@ -49,9 +49,9 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
     const checkOrientation = () => {
       const isPortraitMode =
         window.innerHeight > window.innerWidth &&
-        window.innerWidth < mobileSizeBase;
+        window.innerWidth < MOBILE_SIZE_BASE;
       const isMobileDevice =
-        "ontouchstart" in window || window.innerWidth < mobileSizeBase;
+        "ontouchstart" in window || window.innerWidth < MOBILE_SIZE_BASE;
 
       setIsPortrait(isPortraitMode);
       setIsMobile(isMobileDevice);
@@ -178,7 +178,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const isCurrentlyPortrait =
     isMobile &&
     window.innerHeight > window.innerWidth &&
-    window.innerWidth < mobileSizeBase;
+    window.innerWidth < MOBILE_SIZE_BASE;
   if (isCurrentlyPortrait) {
     return (
       <S.OrientationModal>

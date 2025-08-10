@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { isMobile } from "../../utils/device";
 
 type ChoiceOutcome = "accepted" | "dismissed";
 interface BeforeInstallPromptEvent extends Event {
@@ -21,10 +22,6 @@ function getIOS(): boolean {
 }
 
 export default function InstallPWAButton() {
-  const mobileSizeBase = 768;
-  const isMobile =
-    "ontouchstart" in window || window.innerWidth < mobileSizeBase;
-
   const [deferredEvt, setDeferredEvt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState<boolean>(isStandalone());
@@ -97,7 +94,7 @@ export default function InstallPWAButton() {
            hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
            shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
       >
-        {isMobile ? "📥" : "앱 설치"}
+        {isMobile() ? "📥" : "앱 설치"}
       </button>
 
       {/* iOS 설치 가이드 모달 */}
