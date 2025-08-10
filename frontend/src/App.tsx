@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMe } from "./hooks/useAuth";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
-import GamePage from "./pages/GamePage";
+import GamePage from "./pages/GamePage/GamePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RankingPage from "./pages/RankingPage";
 import MyPage from "./pages/MyPage";
