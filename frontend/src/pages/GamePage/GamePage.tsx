@@ -20,12 +20,9 @@ interface GamePageProps {
   } | null;
 }
 
-// 화면 크기별 동작:
-// - 768px 미만: 모바일 레이아웃 (작은 셀, 작은 간격)
-// - 768px 이상: 데스크톱 레이아웃 (정상 크기 셀, 정상 간격)
-
 const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const navigate = useNavigate();
+  const mobileSizeBase = 768;
 
   const [board, setBoard] = useState<(number | null)[][]>([]);
   const [dragStart, setDragStart] = useState<{
@@ -39,7 +36,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const [isPortrait, setIsPortrait] = useState(false);
   const [isMobile, setIsMobile] = useState(
-    "ontouchstart" in window || window.innerWidth < 768
+    "ontouchstart" in window || window.innerWidth < mobileSizeBase
   );
   const [orientationKey, setOrientationKey] = useState(0);
   const timerRef = useRef<number | null>(null);
@@ -50,9 +47,10 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   useEffect(() => {
     const checkOrientation = () => {
       const isPortraitMode =
-        window.innerHeight > window.innerWidth && window.innerWidth < 768;
+        window.innerHeight > window.innerWidth &&
+        window.innerWidth < mobileSizeBase;
       const isMobileDevice =
-        "ontouchstart" in window || window.innerWidth < 768;
+        "ontouchstart" in window || window.innerWidth < mobileSizeBase;
 
       setIsPortrait(isPortraitMode);
       setIsMobile(isMobileDevice);
@@ -182,7 +180,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const isCurrentlyPortrait =
     isMobile &&
     window.innerHeight > window.innerWidth &&
-    window.innerWidth < 768;
+    window.innerWidth < mobileSizeBase;
   if (isCurrentlyPortrait) {
     return (
       <S.OrientationModal>
