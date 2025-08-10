@@ -38,7 +38,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const [isMobile, setIsMobile] = useState(
     "ontouchstart" in window || window.innerWidth < mobileSizeBase
   );
-  const [orientationKey, setOrientationKey] = useState(0);
+  const [_orientationKey, setOrientationKey] = useState(0);
   const timerRef = useRef<number | null>(null);
 
   const { mutateAsync: saveScore } = useSaveScoreAPI();
