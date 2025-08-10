@@ -16,7 +16,8 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
   const { mutateAsync, isPending } = useSignUp();
 
   const validateUsername = (username: string) => {
-    return username.length >= 2 && username.length <= 20;
+    const ENG_NUM_REGEX = /^[a-zA-Z0-9]+$/;
+    return username.length >= 2 && username.length <= 20 && ENG_NUM_REGEX.test(username);
   };
 
   const validatePassword = (password: string) => {
@@ -33,9 +34,9 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateUsername(username)) {
-      alert("아이디는 2자 이상 20자 이하로 입력해주세요.");
+      alert("아이디는 영문과 숫자만을 사용하여 2자 이상 20자 이하로 입력해주세요.");
       return;
     }
 
@@ -120,12 +121,13 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
                              ? "border-red-300 focus:ring-red-400/50"
                              : "border-[#D9C6BA]/50 focus:ring-[#8C7764]/50 focus:border-transparent"
                          }`}
-                  placeholder="사용할 아이디를 입력하세요 (2-20자)"
+                  placeholder="사용할 아이디를 입력하세요 (영문과 숫자, 2-20자)"
                   required
                 />
                 {username && !validateUsername(username) && (
                   <p className="text-red-500 text-xs mt-1">
-                    아이디는 2자 이상 20자 이하로 입력해주세요.
+                    아이디는 영문과 숫자만을 사용하여 2자 이상 20자 이하로
+                    입력해주세요.
                   </p>
                 )}
               </div>

@@ -7,6 +7,7 @@ const router = express.Router();
 
 // 회원가입
 router.post("/signup", async (req, res) => {
+  const ENG_NUM_REGEX = /^[a-zA-Z0-9]+$/;
 
   try {
     const { username, password } = req.body;
@@ -27,7 +28,8 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+    // 비밀번호는 영문과 숫자만 허용
+    if (!ENG_NUM_REGEX.test(password)) {
       return res.status(400).json({
         success: false,
         message: "비밀번호는 영문자와 숫자를 포함해야 합니다",
@@ -39,6 +41,14 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "사용자명은 2-20자 사이여야 합니다",
+      });
+    }
+
+    // 사용자명은 영문과 숫자만 허용
+    if (!ENG_NUM_REGEX.test(username)) {
+      return res.status(400).json({
+        success: false,
+        message: "사용자명은 영어와 숫자만 사용할 수 있습니다",
       });
     }
 
@@ -85,7 +95,6 @@ router.post("/signup", async (req, res) => {
             message: "회원가입은 성공했으나 세션 저장 실패",
           });
         }
-        
 
         res.status(201).json({
           success: true,
@@ -110,7 +119,6 @@ router.post("/signup", async (req, res) => {
 
 // 로그인
 router.post("/login", (req, res, next) => {
-
   // db 비교 작업 후
   passport.authenticate("local", (error, user, info) => {
     if (error) return res.status(500).json(error);
@@ -125,8 +133,7 @@ router.post("/login", (req, res, next) => {
           console.error("세션 저장 실패:", saveErr);
           return next(saveErr);
         }
-        
-        
+
         res.json({
           success: true,
           data: {
@@ -201,7 +208,6 @@ router.post("/logout", (req, res) => {
 
 // 회원탈퇴
 router.delete("/delete", async (req, res) => {
-
   if (!req.isAuthenticated()) {
     return res.status(401).json({
       success: false,
