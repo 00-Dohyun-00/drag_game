@@ -34,12 +34,13 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   );
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
-  const [isPortrait, setIsPortrait] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false); // 가로모드, 세로모드 판단
   const [isMobile, setIsMobile] = useState(
     "ontouchstart" in window || window.innerWidth < mobileSizeBase
   );
-  const [_orientationKey, setOrientationKey] = useState(0);
+  const [_orientationKey, setOrientationKey] = useState(0); // 강제 리랜더링 위한 함수(모바일 세로모드 모달 문제)
   const timerRef = useRef<number | null>(null);
+  const hasSavedRef = useRef(false);
 
   const { mutateAsync: saveScore } = useSaveScoreAPI();
 
@@ -59,49 +60,58 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
 
     checkOrientation();
 
-    const handleOrientationChange = () => {
-      setTimeout(checkOrientation, 100);
-      setTimeout(checkOrientation, 300);
-      setTimeout(checkOrientation, 500);
-    };
-
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", handleOrientationChange);
-
-    if (screen && screen.orientation) {
-      screen.orientation.addEventListener("change", handleOrientationChange);
-    }
+    window.addEventListener("resize", checkOrientation); // 화면사이즈 변경시
+    window.addEventListener("orientationchange", checkOrientation); // 화면 회전시
 
     return () => {
       window.removeEventListener("resize", checkOrientation);
-      window.removeEventListener("orientationchange", handleOrientationChange);
-      if (screen && screen.orientation) {
-        screen.orientation.removeEventListener(
-          "change",
-          handleOrientationChange
-        );
-      }
+      window.removeEventListener("orientationchange", checkOrientation);
     };
   }, []);
 
+  // 렌덤 숫자
   const generateBoard = () => {
     return Array.from({ length: ROWS }, () =>
       Array.from({ length: COLS }, () => getRandomNumber())
     );
   };
 
+  // 리셋 게임
   const resetGame = useCallback(() => {
     setBoard(generateBoard());
     setScore(0);
     setTimeLeft(GAME_TIME);
+    hasSavedRef.current = false;
   }, []);
 
   useEffect(() => {
     resetGame();
-  }, [resetGame]);
+  }, []);
 
+  // 카운트다운 useEffect
   useEffect(() => {
-    if (timeLeft <= 0) {
+    // 게임 시작시 가로모드 안내 모달 보는 동안 시간 카운트 안 함
+    if (timeLeft === 60 && isMobile && isPortrait) {
+      return;
+    }
+
+    // 시간 1초씩 카운트다운
+    timerRef.current = window.setTimeout(
+      () => setTimeLeft((prev) => prev - 1),
+      1000
+    );
+
+    // cleanup
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+  }, [timeLeft, currentUserInfo?.id, isMobile, isPortrait]);
+
+  // 점수 저장 useEffect
+  useEffect(() => {
+    // 시간이 0이 되면 점수 저장
+    if (timeLeft <= 0 && !hasSavedRef.current) {
+      hasSavedRef.current = true;
       if (currentUserInfo?.id) {
         const params = {
           user_id: currentUserInfo.id,
@@ -111,19 +121,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
       }
       return;
     }
-
-    if (timeLeft === 60 && isMobile && isPortrait) {
-      return;
-    }
-
-    timerRef.current = window.setTimeout(
-      () => setTimeLeft((prev) => prev - 1),
-      1000
-    );
-    return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-    };
-  }, [timeLeft, currentUserInfo?.id, saveScore, score, isMobile, isPortrait]);
+  }, [timeLeft, currentUserInfo?.id, score, saveScore]);
 
   const handleMouseDown = (row: number, col: number) => {
     if (board[row][col] === null || timeLeft <= 0) return;
@@ -301,7 +299,7 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
                 isLandscapeMobile={isLandscapeMobile}
                 isMobile={isMobile}
               >
-                남은 시간:{" "}
+                남은 시간:
                 <S.TimeValue
                   isLandscapeMobile={isLandscapeMobile}
                   isMobile={isMobile}
