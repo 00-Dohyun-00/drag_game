@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { isLandscapeMobile, isMobile } from "../utils/device";
+import { isLandscapeMobile } from "../utils/device";
 
 interface GameOverModalProps {
   isVisible: boolean;
