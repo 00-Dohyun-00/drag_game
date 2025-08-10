@@ -4,6 +4,7 @@ import { useLogout } from "../hooks/useAuth";
 import { useGetRankingAPI } from "../api/scores";
 import { useGetCommentsAPI, useSaveCommentAPI } from "../api/comments";
 import { debounce } from "lodash-es";
+import InstallPWAButton from "../components/buttons/InstallPWAButton";
 
 interface RankingPageProps {
   currentUserInfo: {
@@ -19,6 +20,10 @@ const RankingPage: React.FC<RankingPageProps> = ({
   onLogout,
 }) => {
   const navigate = useNavigate();
+
+  const mobileSizeBase = 768;
+  const isMobile =
+    "ontouchstart" in window || window.innerWidth < mobileSizeBase;
   const [comment, setComment] = useState("");
   const isLoggedIn = !!currentUserInfo;
 
@@ -132,17 +137,22 @@ const RankingPage: React.FC<RankingPageProps> = ({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 md:p-8 relative">
-      {/* 마이페이지 버튼 - 오른쪽 상단 */}
-      {isLoggedIn && (
-        <button
-          onClick={() => navigate("/mypage")}
-          className="absolute top-4 right-4 md:top-8 md:right-8 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-3 py-2 md:px-4 md:py-2 rounded-xl font-semibold text-sm md:text-base
+      {/* 상단 버튼들 */}
+      <div className="absolute top-4 right-4 md:top-8 md:right-8 flex flex-col gap-2 z-10">
+        {isLoggedIn && (
+          <button
+            onClick={() => navigate("/mypage")}
+            className="bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white px-3 py-2 md:px-4 md:py-2 rounded-xl font-semibold text-sm md:text-base
            hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
-           shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer z-10"
-        >
-          마이페이지
-        </button>
-      )}
+           shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+          >
+            {isMobile ? "🏠" : "마이페이지"}
+          </button>
+        )}
+
+        <InstallPWAButton />
+      </div>
+
       <div className="w-full max-w-5xl">
         <div className="text-center mb-6 md:mb-8">
           <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
@@ -201,20 +211,30 @@ const RankingPage: React.FC<RankingPageProps> = ({
                               {getRankIcon(player.rank)}
                             </span>
                             <div className="text-left min-w-0 flex-1">
-                              <h3 className={`${textStyles.username} text-sm md:text-base lg:text-lg truncate`}>
+                              <h3
+                                className={`${textStyles.username} text-sm md:text-base lg:text-lg truncate`}
+                              >
                                 {`${player.nickname || ""}(${player.username})`}
                               </h3>
-                              <p className={`${textStyles.streak} text-xs md:text-sm`}>
+                              <p
+                                className={`${textStyles.streak} text-xs md:text-sm`}
+                              >
                                 {player.achieved_at.split("T")[0]}
                               </p>
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0">
-                            <div className={`${textStyles.score} text-sm md:text-lg lg:text-xl`}>
+                            <div
+                              className={`${textStyles.score} text-sm md:text-lg lg:text-xl`}
+                            >
                               {player.best_score?.toLocaleString()}
                             </div>
                             {textStyles.scoreLabel && (
-                              <div className={`${textStyles.scoreLabel} text-xs md:text-sm`}>점수</div>
+                              <div
+                                className={`${textStyles.scoreLabel} text-xs md:text-sm`}
+                              >
+                                점수
+                              </div>
                             )}
                           </div>
                         </div>
@@ -323,10 +343,7 @@ const RankingPage: React.FC<RankingPageProps> = ({
               {/* 코멘트 목록 */}
               <div className="space-y-2 flex-1 overflow-y-auto">
                 {commentsData?.map((item: any) => (
-                  <div
-                    key={item.id}
-                    className="bg-[#F5F0EA] p-3 rounded-lg"
-                  >
+                  <div key={item.id} className="bg-[#F5F0EA] p-3 rounded-lg">
                     <div className="flex justify-between items-start">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
