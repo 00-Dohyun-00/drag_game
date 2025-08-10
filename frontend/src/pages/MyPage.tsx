@@ -18,6 +18,10 @@ const MyPage: React.FC<MyPageProps> = ({ currentUserInfo }) => {
   const navigate = useNavigate();
   const { refetch: meRefetch } = useMe();
 
+  const mobileSizeBase = 768;
+  const isMobile =
+    "ontouchstart" in window || window.innerWidth < mobileSizeBase;
+
   const [newNickname, setNewNickname] = useState(
     currentUserInfo?.nickname || ""
   );
@@ -112,7 +116,7 @@ const MyPage: React.FC<MyPageProps> = ({ currentUserInfo }) => {
          hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
          shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer z-10"
       >
-        ← 랭킹으로
+        {isMobile ? "↩️" : "← 랭킹으로"}
       </button>
 
       <div className="w-full max-w-6xl">
