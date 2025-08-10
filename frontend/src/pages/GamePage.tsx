@@ -33,7 +33,12 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const [isPortrait, setIsPortrait] = useState(false); // 화면 가로모드인지 확인
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(
+    "ontouchstart" in window ||
+      window.innerWidth < 1024 ||
+      window.innerHeight < 600
+  );
+  const [orientationKey, setOrientationKey] = useState(0); // 강제 리렌더링을 위한 키
   const timerRef = useRef<number | null>(null);
 
   const { mutateAsync: saveScore } = useSaveScoreAPI();
@@ -43,22 +48,55 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
     const checkOrientation = () => {
       const isPortraitMode =
         window.innerHeight > window.innerWidth && window.innerWidth < 768;
+      // 모바일 감지: 터치 기능이 있거나 작은 화면
+      const isMobileDevice =
+        "ontouchstart" in window ||
+        window.innerWidth < 1024 ||
+        window.innerHeight < 600;
+
+      // 모바일 디버깅을 위한 정보 (잠시만 표시)
+      // console.log('Orientation check:', {
+      //   innerWidth: window.innerWidth,
+      //   innerHeight: window.innerHeight,
+      //   isPortraitMode,
+      //   isMobileDevice,
+      //   currentIsPortrait: isPortrait,
+      //   currentIsMobile: isMobile
+      // });
+
       setIsPortrait(isPortraitMode);
+      setIsMobile(isMobileDevice);
+      setOrientationKey((prev) => prev + 1); // 강제 리렌더링
     };
 
     // 초기 체크
     checkOrientation();
 
     // 화면 회전 이벤트 리스너
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", () => {
-      // orientationchange 이벤트는 약간의 지연 후에 실행
+    const handleOrientationChange = () => {
+      // orientationchange 이벤트는 여러 번의 지연을 통해 안정적으로 감지
       setTimeout(checkOrientation, 100);
-    });
+      setTimeout(checkOrientation, 300);
+      setTimeout(checkOrientation, 500);
+    };
+
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    // 추가적으로 screen orientation API도 사용
+    if (screen && screen.orientation) {
+      screen.orientation.addEventListener("change", handleOrientationChange);
+    }
 
     return () => {
       window.removeEventListener("resize", checkOrientation);
-      window.removeEventListener("orientationchange", checkOrientation);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+      if (screen && screen.orientation) {
+        screen.orientation.removeEventListener(
+          "change",
+          handleOrientationChange
+        );
+      }
     };
   }, []);
 
@@ -156,8 +194,12 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
     return row >= minRow && row <= maxRow && col >= minCol && col <= maxCol;
   };
 
-  // 모바일 세로 모드일 때 회전 안내 화면
-  if (isMobile && isPortrait) {
+  // 모바일 세로 모드일 때 회전 안내 화면 - 실시간 체크
+  const isCurrentlyPortrait =
+    isMobile &&
+    window.innerHeight > window.innerWidth &&
+    window.innerWidth < 768;
+  if (isCurrentlyPortrait) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 text-center text-white">
         <div className="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/20">
@@ -179,59 +221,173 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
     );
   }
 
+  const isLandscapeMobile = isMobile && window.innerWidth > window.innerHeight;
+
   return (
     <div
-      className="min-h-screen p-4 md:p-8 text-center text-white flex flex-col items-center justify-center relative"
+      className={`text-center text-white relative ${
+        isLandscapeMobile
+          ? "h-screen flex flex-row p-2 gap-4"
+          : `flex flex-col items-center ${
+              isMobile
+                ? "h-screen justify-between py-1 px-1"
+                : "min-h-screen justify-center p-4 md:p-8"
+            }`
+      }`}
       onMouseUp={handleMouseUp}
+      onTouchEnd={handleMouseUp}
     >
-      <div className="text-center mb-4 md:mb-6">
-        <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
-          Drag Game
-        </h1>
+      {/* 왼쪽 사이드바 (모바일 가로모드) 또는 상단 정보 (일반) */}
+      <div
+        className={
+          isLandscapeMobile
+            ? "flex flex-col justify-between h-full w-48 text-left"
+            : `text-center ${isMobile ? "mb-1" : "mb-4 md:mb-6"}`
+        }
+      >
+        {/* 게임 타이틀과 사용자 정보 */}
+        <div className={isLandscapeMobile ? "space-y-2" : ""}>
+          <h1
+            className={`font-bold text-white drop-shadow-lg ${
+              isLandscapeMobile
+                ? "text-base"
+                : isMobile
+                ? "text-lg mb-1"
+                : "text-3xl md:text-5xl mb-4 text-center"
+            }`}
+          >
+            Drag Game
+          </h1>
 
-        <span className="flex items-center justify-center gap-4 text-white/80 text-sm md:text-base">
-          이용자:
-          {`${currentUserInfo?.nickname || ""}(${currentUserInfo?.username})`}
-        </span>
-      </div>
-
-      <div className="w-full max-w-fit">
-        <div className="flex flex-col md:flex-row items-center justify-between w-full text-lg md:text-xl mb-4 text-white drop-shadow-md gap-2 md:gap-4">
-          <div className="flex flex-col items-center md:items-start">
-            <p className="text-sm md:text-base">점수: {score}</p>
-
-            <p className="text-sm md:text-base">
-              남은 시간 :&nbsp;
-              <span className="text-lg md:text-xl">{timeLeft}</span>
-              &nbsp;s
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={resetGame}
-              className="px-3 py-2 md:px-4 md:py-2 bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white rounded-lg font-semibold text-xs md:text-sm
-                       hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
-                       shadow-md hover:shadow-lg hover:-translate-y-0.5
-                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
-            >
-              다시 시작
-            </button>
-            <button
-              onClick={() => navigate("/ranking")}
-              className="px-3 py-2 md:px-4 md:py-2 bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white rounded-lg font-semibold text-xs md:text-sm
-                       hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
-                       shadow-md hover:shadow-lg hover:-translate-y-0.5
-                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
-            >
-              나가기
-            </button>
-          </div>
+          <span
+            className={`flex gap-2 text-white/80 ${
+              isLandscapeMobile
+                ? "flex-col text-xs"
+                : `items-center ${isMobile ? "justify-center text-xs" : "justify-center text-sm md:text-base gap-4"}`
+            }`}
+          >
+            <span>이용자:</span>
+            <span>{`${
+              currentUserInfo?.nickname || ""
+            }(${currentUserInfo?.username})`}</span>
+          </span>
         </div>
 
+        {/* 점수와 시간 정보 */}
+        {isLandscapeMobile ? (
+          <div className="flex flex-col gap-2 text-sm text-white drop-shadow-md">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm">점수: {score}</p>
+              <p className="text-sm">
+                남은 시간:{" "}
+                <span className="text-base font-bold">{timeLeft}</span>s
+              </p>
+            </div>
+            {/* 버튼들 */}
+            <div className="flex flex-col gap-2 mt-4">
+              <button
+                onClick={resetGame}
+                className="bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white rounded-lg font-semibold
+                         hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
+                         shadow-md hover:shadow-lg hover:-translate-y-0.5
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer
+                         px-3 py-2 text-xs w-full"
+              >
+                다시 시작
+              </button>
+              <button
+                onClick={() => navigate("/ranking")}
+                className="bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white rounded-lg font-semibold
+                         hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
+                         shadow-md hover:shadow-lg hover:-translate-y-0.5
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer
+                         px-3 py-2 text-xs w-full"
+              >
+                나가기
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={`flex items-center justify-between text-white drop-shadow-md ${
+              isMobile
+                ? "w-full flex-row text-sm mb-1 gap-2"
+                : "flex-row text-lg md:text-xl mb-2 gap-2 md:gap-4"
+            }`}
+            style={!isMobile ? { width: 'calc(17 * (2.5rem + 0.25rem) - 0.25rem + 3rem)' } : {}}
+          >
+            <div
+              className={`flex ${
+                isMobile
+                  ? "flex-row gap-4 text-xs"
+                  : "flex-col items-start"
+              }`}
+            >
+              <p className={isMobile ? "text-xs" : "text-sm md:text-base"}>
+                점수: {score}
+              </p>
+              <p className={isMobile ? "text-xs" : "text-sm md:text-base"}>
+                남은 시간:{" "}
+                <span className={isMobile ? "text-sm" : "text-lg md:text-xl"}>
+                  {timeLeft}
+                </span>
+                &nbsp;s
+              </p>
+            </div>
+
+            <div className="flex gap-1">
+              <button
+                onClick={resetGame}
+                className={`bg-gradient-to-r from-[#8C7764] to-[#594A3C] text-white rounded-lg font-semibold
+                         hover:from-[#594A3C] hover:to-[#3d3329] transition-all duration-300 ease-in-out
+                         shadow-md hover:shadow-lg hover:-translate-y-0.5
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer
+                         ${
+                           isMobile
+                             ? "px-2 py-1 text-xs"
+                             : "px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm"
+                         }`}
+              >
+                다시 시작
+              </button>
+              <button
+                onClick={() => navigate("/ranking")}
+                className={`bg-gradient-to-r from-[#c4c3c2] to-[#bcb6b3] text-white rounded-lg font-semibold
+                         hover:from-[#d6d6d6] hover:to-[#d1cbc5] transition-all duration-300 ease-in-out
+                         shadow-md hover:shadow-lg hover:-translate-y-0.5
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer
+                         ${
+                           isMobile
+                             ? "px-2 py-1 text-xs"
+                             : "px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm"
+                         }`}
+              >
+                나가기
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 게임 보드 */}
+      <div
+        className={`${
+          isLandscapeMobile
+            ? "flex-1 h-full flex items-center justify-center"
+            : `w-full ${isMobile ? "flex-1 flex flex-col" : "max-w-fit mx-auto"}`
+        }`}
+      >
         <div
-          className="grid grid-cols-17 gap-1 justify-center mt-4 p-3 md:p-6 
-                      bg-white/15 backdrop-blur-md rounded-2xl border border-white/20 overflow-x-auto"
+          className={`grid grid-cols-17 justify-center
+                      bg-white/15 backdrop-blur-md rounded-2xl border border-white/20 
+                      ${
+                        isLandscapeMobile
+                          ? "gap-px p-1 h-full max-h-full aspect-[17/10]"
+                          : isMobile
+                          ? "gap-px p-1 flex-1 max-w-full h-full"
+                          : "gap-1 p-3 md:p-6 mt-4"
+                      }`}
+          style={isMobile ? { gridTemplateRows: "repeat(10, 1fr)" } : {}}
         >
           {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => {
@@ -242,8 +398,13 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
                 <div
                   key={`${rowIndex}-${colIndex}`}
                   className={`
-                  w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center 
-                  select-none text-sm md:text-base font-semibold transition-all duration-500 ease-in-out shadow-sm
+                  ${
+                    isMobile
+                      ? "w-full h-full text-xs min-w-0 min-h-0"
+                      : "w-8 h-8 md:w-10 md:h-10 text-sm md:text-base"
+                  } 
+                  rounded-lg flex items-center justify-center 
+                  select-none font-semibold transition-all duration-500 ease-in-out shadow-sm
                   ${
                     timeLeft <= 0
                       ? isEmpty
@@ -257,9 +418,27 @@ const GamePage: React.FC<GamePageProps> = ({ currentUserInfo }) => {
                   }
                 `}
                   onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+                  onTouchStart={() => handleMouseDown(rowIndex, colIndex)}
                   onMouseEnter={() =>
                     dragStart && setDragEnd({ row: rowIndex, col: colIndex })
                   }
+                  onTouchMove={(e) => {
+                    e.preventDefault();
+                    if (!dragStart) return;
+                    const touch = e.touches[0];
+                    const element = document.elementFromPoint(
+                      touch.clientX,
+                      touch.clientY
+                    );
+                    if (element) {
+                      const cellData = element.getAttribute("data-cell");
+                      if (cellData) {
+                        const [r, c] = cellData.split("-").map(Number);
+                        setDragEnd({ row: r, col: c });
+                      }
+                    }
+                  }}
+                  data-cell={`${rowIndex}-${colIndex}`}
                 >
                   {cell ?? ""}
                 </div>
