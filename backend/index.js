@@ -39,10 +39,20 @@ const corsOptions = {
       process.env.FRONTEND_URL,
       "http://localhost:5173", // Vite 개발 서버
       "http://localhost:3000", // 기타 개발 서버
+      process.env.MOBILE_DEV_URL, // 모바일 테스트용 (환경변수)
     ].filter(Boolean);
 
+    // 개발 환경에서는 모든 로컬 네트워크 접근 허용
     if (!origin && process.env.NODE_ENV !== "production") {
       return callback(null, true);
+    }
+
+    // 개발 환경에서 192.168.x.x 또는 10.x.x.x 대역 허용
+    if (process.env.NODE_ENV !== "production" && origin) {
+      const isLocalNetwork = /^http:\/\/(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(origin);
+      if (isLocalNetwork) {
+        return callback(null, true);
+      }
     }
 
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -164,6 +174,9 @@ app.use("/scores", scoresRouter);
 app.use("/comments", commentRouter);
 app.use("/user", userRouter);
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server listening at http://localhost:${port}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`Network access enabled - check your local IP address`);
+  }
 });
