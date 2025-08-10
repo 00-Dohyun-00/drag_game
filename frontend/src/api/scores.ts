@@ -52,8 +52,9 @@ export const useSaveScoreAPI = () => {
     },
     onSuccess: (response) => {
       console.log("점수 저장 성공:", response);
-      // 점수 저장 후 랭킹 캐시 무효화
+      // 점수 저장 후 랭킹, 게임 기록 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "game-history"] });
     },
     onError: (error) => {
       console.error("점수 저장 실패:", error);
