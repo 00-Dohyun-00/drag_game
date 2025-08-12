@@ -10,7 +10,7 @@ https://drag-game.vercel.app
 ### 프론트엔드
 
 - React + TypeScript + Vite
-- Tailwind CSS
+- Tailwind CSS + Emotion CSS
 
 ### 백엔드
 
