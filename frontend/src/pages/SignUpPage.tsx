@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSignUp } from "../hooks/useAuth";
 
 interface SignUpPageProps {
-  onSignUp: () => void;
+  onSignUp: () => Promise<void>;
 }
 
 const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
@@ -53,10 +53,10 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onSignUp }) => {
     mutateAsync(
       { username, password },
       {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
           if (response.success && !!response.data?.user) {
             alert("회원가입에 성공했습니다!");
-            onSignUp();
+            await onSignUp();
             navigate("/ranking");
           }
         },

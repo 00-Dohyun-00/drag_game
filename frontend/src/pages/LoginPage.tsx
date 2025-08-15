@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
 
 interface LoginPageProps {
-  onLogin: () => void;
+  onLogin: () => Promise<void>;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -22,10 +22,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       mutateAsync(
         { username, password },
         {
-          onSuccess: (response) => {
+          onSuccess: async (response) => {
             if (response.success && !!response.data?.user) {
-              onLogin();
-              navigate("/drag-game");
+              await onLogin();
+              navigate("/ranking");
             }
           },
           onError: (error) => {
