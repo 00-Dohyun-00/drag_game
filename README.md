@@ -3,13 +3,14 @@
 ## 배포 주소
 
 https://drag-game.vercel.app
+(무료 서버 사용중이므로 처음 접속시 화면 로드까지 오래 걸릴 수 있습니다.)
 
 ## 기술 스택
 
 ### 프론트엔드
 
 - React + TypeScript + Vite
-- Tailwind CSS
+- Tailwind CSS + Emotion CSS
 
 ### 백엔드
 
